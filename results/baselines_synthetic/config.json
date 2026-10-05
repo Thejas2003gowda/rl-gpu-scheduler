@@ -1,0 +1,16 @@
+{
+  "source": "synthetic",
+  "capacity_gpus": 64,
+  "offered_load_test": 0.9769674069532431,
+  "jobs_total": 20000,
+  "jobs_test": 6000,
+  "jobs_dropped_too_big": 0,
+  "episodes": 30,
+  "episode_len": 1024,
+  "window": 10,
+  "train_frac": 0.7,
+  "seed": 0,
+  "warm_start": false,
+  "bg_gpus_at_start_mean": 0.0,
+  "bg_overflow_jobs_mean": 0.0
+}

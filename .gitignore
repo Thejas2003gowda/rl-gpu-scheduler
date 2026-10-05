@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+# raw and processed data stay local (the Philly trace is ~1 GB)
+data/*
+!data/.gitkeep
+philly-traces/

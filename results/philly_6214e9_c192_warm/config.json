@@ -1,0 +1,16 @@
+{
+  "source": "philly vc=6214e9",
+  "capacity_gpus": 192,
+  "offered_load_test": 0.5494994216092637,
+  "jobs_total": 51955,
+  "jobs_test": 15587,
+  "jobs_dropped_too_big": 0,
+  "episodes": 30,
+  "episode_len": 1024,
+  "window": 10,
+  "train_frac": 0.7,
+  "seed": 0,
+  "warm_start": true,
+  "bg_gpus_at_start_mean": 177.86666666666667,
+  "bg_overflow_jobs_mean": 156.36666666666667
+}
