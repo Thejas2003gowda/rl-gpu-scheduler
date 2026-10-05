@@ -165,6 +165,9 @@ Initial observations:
 
 ![Paired comparison](results/philly_6214e9_c256_warm_nonoverlap/paired_vs_reference.png)
 
+The proposal's Fig. 1 (`paired_figure.pdf` in the same folder) is drawn from the same
+`paired.csv` by `scripts/plot_paired_figure.py`.
+
 Synthetic-data runs (pipeline check only, not used as results) are in `results/baselines_synthetic/`.
 
 ## Evaluation plan and success criteria (Phase 2)
@@ -205,7 +208,8 @@ Synthetic-data runs (pipeline check only, not used as results) are in `results/b
   started at their submit time (the trace does not give their real waits). If
   they need more GPUs than the cluster has, they are added in submission order
   until it is full and the rest are skipped (count reported in `config.json`;
-  about 130 per episode at 256 GPUs), so load is underestimated.
+  at 256 GPUs: 132 per episode over the 30 overlapping episodes, 149 over the
+  15 non-overlapping ones), so load is underestimated.
 * **The simulator has not yet been checked against the waits recorded in the
   trace.** This validation is planned for Phase 2.
   Without `--warm-start`, episodes start with an empty cluster.
@@ -232,6 +236,7 @@ scripts/
   check_env.py       Gymnasium API check and speed test
   run_baselines.py   Evaluate baselines; write tables and figures
   smoke_maskable_ppo.py  Quick check that MaskablePPO trains on the env (not a result)
+  plot_paired_figure.py  Draws the proposal figure from a paired.csv
 tests/
   test_env.py        12 hand-computed tests: schedules, rewards, warm start, paired stats, parser, estimates, observation scaling
 results/             Outputs (Philly results + synthetic pipeline check)
