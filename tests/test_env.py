@@ -204,3 +204,18 @@ def test_paired_bootstrap_by_hand():
     assert r["diff_ci_lo"] == pytest.approx(1.0) and r["diff_ci_hi"] == pytest.approx(1.0)
     assert r["pct_change"] == pytest.approx(100 * (10 / 7 - 1))
     assert r["frac_better"] == 0.0
+
+
+def test_obs_same_meaning_for_any_episode_length():
+    # Regression test: the same situation must give the same observation in a
+    # 256-job training episode and a 1,024-job test episode.
+    from gpusched import make_synthetic_jobs
+    jobs = add_duration_estimates(make_synthetic_jobs(n_jobs=3000, capacity=64))
+    obs = []
+    for length in (256, 1024):
+        env = GPUSchedEnv(jobs, capacity=64, episode_len=length)
+        env.reset(options={"start": 0})
+        env.queue, env.free, env.now = list(range(10)), 7, 0.0
+        obs.append(env._obs())
+    np.testing.assert_allclose(obs[0], obs[1])
+    assert obs[0].shape == (52,)

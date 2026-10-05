@@ -29,7 +29,11 @@ Observation (all values scaled to [0, 1]), per visible slot:
     [slot filled, GPUs requested / capacity, fits now,
      log duration feature, log time waited so far]
 plus 3 global values:
-    [free GPUs / capacity, log queue length, log jobs still to arrive]
+    [free GPUs / capacity, log queue length (fixed scale, MAX_QUEUE)]
+Both are scaled by constants that do not depend on episode length, so an
+agent trained on 256-job episodes reads its inputs the same way on 1,024-job
+test episodes. (A real scheduler cannot know how many jobs are still to
+arrive, so that is deliberately not an input.)
 
 The duration feature depends on ``duration_info``:
     "estimate" -> user's past average (realistic)
@@ -55,7 +59,8 @@ from gymnasium import spaces
 from .metrics import episode_metrics
 
 SLOT_FEATURES = 5
-GLOBAL_FEATURES = 3
+GLOBAL_FEATURES = 2
+MAX_QUEUE = 1024  # queue-length scale (fixed; longer queues clip to 1.0)
 MAX_TIME = 30 * 24 * 3600.0  # 30 days, for log scaling
 LOG_MAX_TIME = math.log1p(MAX_TIME)
 DURATION_INFO = ("estimate", "oracle", "none")
@@ -291,10 +296,8 @@ class GPUSchedEnv(gym.Env):
             obs[b + 3] = math.log1p(self._duration_feature(job)) / LOG_MAX_TIME
             obs[b + 4] = math.log1p(max(self.now - self.submit[job], 0.0)) / LOG_MAX_TIME
         g = self.window * SLOT_FEATURES
-        log_n = math.log1p(self.episode_len)
         obs[g] = self.free / self.capacity
-        obs[g + 1] = math.log1p(len(self.queue)) / log_n
-        obs[g + 2] = math.log1p(self.episode_len - self.next_arrival) / log_n
+        obs[g + 1] = math.log1p(len(self.queue)) / math.log1p(MAX_QUEUE)
         return np.clip(obs, 0.0, 1.0)
 
     def _info(self):

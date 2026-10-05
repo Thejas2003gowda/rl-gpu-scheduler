@@ -23,7 +23,7 @@ the scheduler only has the user's past behaviour to go on.
 |---|---|
 | Environment | Event-driven simulator of one pool of `C` GPUs. Jobs arrive at their trace submit times, need all their GPUs at once (gang scheduling), and run for their trace duration. No preemption. |
 | Decision point | Whenever at least one job in the visible window fits in the free GPUs. Time jumps between arrivals and completions. |
-| State (53 numbers, all in [0, 1]) | For each of the first 10 queued jobs: slot filled, GPUs requested / C, fits now, log duration feature, log time waited. Plus free GPUs / C, log queue length, log jobs still to arrive. |
+| State (52 numbers, all in [0, 1]) | For each of the first 10 queued jobs: slot filled, GPUs requested / C, fits now, log duration feature, log time waited. Plus free GPUs / C and log queue length. All use fixed scales, so they mean the same in 256- and 1,024-job episodes. |
 | Duration feature | `estimate` = user's past average (realistic), `oracle` = true duration (upper reference), `none` = 0. |
 | Action (Discrete(11)) | 0-9: start the job in that queue slot. 10: WAIT until the next arrival or completion. Invalid actions are masked (`env.action_masks()`, works with `sb3_contrib.MaskablePPO`). |
 | Reward (`wait`, default) | Minus the waiting time accrued by all queued jobs since the last step (scaled). Over an episode it sums to minus the total waiting time. |
@@ -58,7 +58,7 @@ sequences (paired comparison).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                          # 11 hand-checked tests
+python -m pytest -q                          # 12 hand-checked tests
 python scripts/check_env.py                  # Gymnasium API check + speed
 python scripts/run_baselines.py --data synthetic
 ```
@@ -169,13 +169,21 @@ Synthetic-data runs (pipeline check only, not used as results) are in `results/b
 
 ## Evaluation plan and success criteria (Phase 2)
 
-* **Algorithms:** DQN (own implementation) and MaskablePPO, trained on 256-job episodes
-  from the training period, tested on 1,024-job episodes from the test period.
+* **Research questions:** (RQ1) Can an RL agent that does not know true run times reduce
+  waiting time compared with first-fit? (RQ2) How much does it depend on duration
+  information? (RQ3) Do the conclusions hold with 8-GPU machines and on another
+  virtual cluster?
+* **Algorithms:** DQN (own implementation, invalid actions excluded from action selection
+  and targets) and MaskablePPO, trained on 256-job episodes from the training period,
+  tested on 1,024-job episodes from the test period. Discount factor close to 1.
+* **Tuning:** hyperparameters (including the discount factor) are tuned on a validation
+  slice, the last 15% of the training period; never on the test period.
 * **Seeds:** 10 per algorithm for the main comparison; 5 per algorithm for each experiment.
-* **Success criterion:** the RL agent's total waiting time is lower than first-fit's on the
-  15 non-overlapping test episodes (256 GPUs, warm start), and the 95% CI of the paired
-  difference, aggregated across seeds, lies entirely below zero. The 30 overlapping
-  episodes are reported as a robustness check. We also report how much of the gap to SJF
+* **Success criterion:** for each seed, compute the change in total waiting time vs
+  first-fit over the 15 non-overlapping test episodes (256 GPUs, warm start). The RL agent
+  succeeds if the interquartile mean of this change across seeds has a 95% bootstrap CI
+  (resampling seeds and episodes) lying entirely below zero. The 30 overlapping episodes
+  are reported as a robustness check. We also report how much of the gap to SJF
   with true durations is recovered.
 * **If RL does not meet the criterion,** we report where and why, using the duration
   information experiment (true / user average / none).
@@ -223,8 +231,9 @@ scripts/
   prepare_philly.py  Parse cluster_job_log -> data/philly_jobs.csv (+ workload stats)
   check_env.py       Gymnasium API check and speed test
   run_baselines.py   Evaluate baselines; write tables and figures
+  smoke_maskable_ppo.py  Quick check that MaskablePPO trains on the env (not a result)
 tests/
-  test_env.py        11 hand-computed tests: schedules, rewards, warm start, paired stats, parser, estimates
+  test_env.py        12 hand-computed tests: schedules, rewards, warm start, paired stats, parser, estimates, observation scaling
 results/             Outputs (Philly results + synthetic pipeline check)
 data/                Local data (not committed)
 ```
@@ -233,11 +242,13 @@ data/                Local data (not committed)
 
 * DQN (own implementation) and MaskablePPO (sb3-contrib), trained on 256-job
   episodes and tested on 1,024-job episodes; `pip install -r requirements-rl.txt`.
-* Two action designs: pick a job (this environment) vs pick a rule every N minutes.
-* Experiments: duration information (oracle / user average / none), stale view
-  of free GPUs, window size, load level, **one GPU pool vs 8-GPU machines**,
-  train on one virtual cluster and test on another; 5-10 seeds each, IQM with
-  95% confidence intervals.
+* Core experiments: **E1** duration information (true / user average / none);
+  **E2** one GPU pool vs 8-GPU machines; **E3** train on `6214e9`, test on `11cb48`.
+* If time permits: episode-end bounded-slowdown reward, window size 5 vs 20, no WAIT
+  action, and an agent that picks a rule instead of a job.
+* Check simulated waits against the waits recorded in the trace.
+* Milestones: by Oct 19 DQN implemented and tested, PPO learning curves; by Nov 2 main
+  comparison and tuning; by Nov 13 E1-E3; presentation Nov 17-Dec 1; final paper Dec 8.
 
 ## References
 
