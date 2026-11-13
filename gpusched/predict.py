@@ -165,3 +165,47 @@ def spearman(a, b):
     ra = pd.Series(a).rank().to_numpy()
     rb = pd.Series(b).rank().to_numpy()
     return float(np.corrcoef(ra, rb)[0, 1])
+
+
+# ---------------------------------------------------------------- agent inputs
+# Run-time signals given to the agent directly (duration_info="signals"), one
+# block per queued job, all scaled to [0, 1] with fixed scales and computed from
+# ``history_features`` (so they never use future information). Missing history
+# -> 0; the user's job count (also 0 then) tells the agent there is no history.
+AGENT_SIGNALS = [
+    "sig_user_jobs",      # log(1 + user's finished jobs) / 10
+    "sig_user_median",    # median log run time of the user's finished jobs / log(30 days)
+    "sig_user_spread",    # std of those log run times / 5
+    "sig_user_last2",     # mean log run time of the user's last 2 finished jobs / log(30 days)
+    "sig_user_fail",      # share of the user's finished jobs that failed or were killed
+    "sig_user_gpu_mean",  # mean log run time of the user's finished jobs with the same GPU count
+    "sig_hour_sin",       # time of day (UTC), cyclic: (sin + 1) / 2
+    "sig_hour_cos",       #                             (cos + 1) / 2
+]
+_LOG_MAX_TIME = math.log1p(30 * 24 * 3600.0)
+
+
+def agent_signal_features(df):
+    """Per-job agent inputs (``AGENT_SIGNALS``) for every row of ``df``, aligned with its index."""
+    f = history_features(df)
+    angle = 2 * np.pi * f["hour"] / 24
+    out = pd.DataFrame({
+        "sig_user_jobs": f["u_n"] / 10,
+        "sig_user_median": f["u_median"] / _LOG_MAX_TIME,
+        "sig_user_spread": f["u_std"] / 5,
+        "sig_user_last2": f["u_last2"] / _LOG_MAX_TIME,
+        "sig_user_fail": f["u_fail_frac"],
+        "sig_user_gpu_mean": f["ug_mean"] / _LOG_MAX_TIME,
+        "sig_hour_sin": (np.sin(angle) + 1) / 2,
+        "sig_hour_cos": (np.cos(angle) + 1) / 2,
+    }, index=df.index)
+    return out[AGENT_SIGNALS].fillna(0.0).clip(0.0, 1.0)
+
+
+def add_agent_signals(jobs):
+    """Copy of ``jobs`` with the ``AGENT_SIGNALS`` columns added (no-op if present)."""
+    if all(c in jobs.columns for c in AGENT_SIGNALS):
+        return jobs
+    out = jobs.copy()
+    out[AGENT_SIGNALS] = agent_signal_features(jobs)
+    return out

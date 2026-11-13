@@ -43,6 +43,10 @@ The duration feature depends on ``duration_info``:
     "predicted"-> output of a run-time predictor (``pred_duration`` column,
                   see scripts/build_predictions.py)
     "none"     -> always 0 (no duration information)
+    "signals"  -> user's past average, plus a block of extra inputs per slot
+                  (``gpusched.predict.AGENT_SIGNALS``: the user's median, spread,
+                  last-2 and same-GPU-count run times, failure share, job count,
+                  time of day), appended after the 2 global values
 
 Reward:
     "wait" (dense): minus the total waiting time accrued by ALL queued jobs
@@ -67,7 +71,7 @@ GLOBAL_FEATURES = 2
 MAX_QUEUE = 1024  # queue-length scale (fixed; longer queues clip to 1.0)
 MAX_TIME = 30 * 24 * 3600.0  # 30 days, for log scaling
 LOG_MAX_TIME = math.log1p(MAX_TIME)
-DURATION_INFO = ("estimate", "oracle", "predicted", "none")
+DURATION_INFO = ("estimate", "oracle", "predicted", "none", "signals")
 REWARD_MODES = ("wait", "bsld")
 
 
@@ -83,6 +87,12 @@ class GPUSchedEnv(gym.Env):
             raise ValueError(f"duration_info must be one of {DURATION_INFO}")
         if "est_duration" not in jobs.columns:
             raise ValueError("jobs needs an 'est_duration' column; call add_duration_estimates first")
+        if duration_info == "signals":
+            from .predict import AGENT_SIGNALS
+            missing = [c for c in AGENT_SIGNALS if c not in jobs.columns]
+            if missing:
+                raise ValueError("duration_info='signals' needs the AGENT_SIGNALS columns; "
+                                 "call gpusched.predict.add_agent_signals first")
         if duration_info == "predicted" and "pred_duration" not in jobs.columns:
             raise ValueError("duration_info='predicted' needs a 'pred_duration' column "
                              "(run scripts/build_predictions.py)")
@@ -112,6 +122,12 @@ class GPUSchedEnv(gym.Env):
         self._all_est = jobs["est_duration"].to_numpy(float)
         self._all_pred = (jobs["pred_duration"].to_numpy(float) if "pred_duration" in jobs.columns
                           else None)
+        if duration_info == "signals":
+            from .predict import AGENT_SIGNALS
+            self._all_sig = jobs[AGENT_SIGNALS].to_numpy(np.float32)
+        else:
+            self._all_sig = None
+        self.extra = 0 if self._all_sig is None else self._all_sig.shape[1]  # per-job extra inputs
         self.n_jobs_total = len(jobs)
 
         self.warm_start = bool(warm_start)
@@ -125,7 +141,7 @@ class GPUSchedEnv(gym.Env):
         self.action_space = spaces.Discrete(self.window + 1)
         self.observation_space = spaces.Box(
             low=0.0, high=1.0,
-            shape=(self.window * SLOT_FEATURES + GLOBAL_FEATURES,), dtype=np.float32)
+            shape=(self.window * (SLOT_FEATURES + self.extra) + GLOBAL_FEATURES,), dtype=np.float32)
 
     # ------------------------------------------------------------------ API
     def reset(self, *, seed=None, options=None):
@@ -144,6 +160,7 @@ class GPUSchedEnv(gym.Env):
         self.dur = self._all_dur[sl]
         self.est = self._all_est[sl]
         self.pred = self._all_pred[sl] if self._all_pred is not None else None
+        self.sig = self._all_sig[sl] if self._all_sig is not None else None
         n = self.episode_len
         self.start_time = np.full(n, np.nan)
         self.finish_time = np.full(n, np.nan)
@@ -297,7 +314,7 @@ class GPUSchedEnv(gym.Env):
             self._jump_to_next_event()
 
     def _duration_feature(self, job):
-        if self.duration_info == "estimate":
+        if self.duration_info in ("estimate", "signals"):
             return self.est[job]
         if self.duration_info == "oracle":
             return self.dur[job]
@@ -317,6 +334,10 @@ class GPUSchedEnv(gym.Env):
         g = self.window * SLOT_FEATURES
         obs[g] = self.free / self.capacity
         obs[g + 1] = math.log1p(len(self.queue)) / math.log1p(MAX_QUEUE)
+        if self.extra:  # "signals": one block of extra inputs per slot, after the global values
+            e = g + GLOBAL_FEATURES
+            for slot, job in enumerate(self.queue[: self.window]):
+                obs[e + slot * self.extra: e + (slot + 1) * self.extra] = self.sig[job]
         return np.clip(obs, 0.0, 1.0)
 
     def _info(self):

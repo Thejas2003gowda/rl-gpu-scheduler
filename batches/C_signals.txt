@@ -1,0 +1,39 @@
+# Batch C (E1b): run-time signals as direct agent inputs (pre-registered in PREREGISTRATION.md).
+# Same settings, steps and frozen configs as the user-average agents of batch B; only
+# --duration-info changes to 'signals'. Validation-only during training.
+# 30 runs; about 30-45 min at --parallel 2 on a recent laptop CPU. Safe to stop and restart.
+# Run:  python scripts/run_many.py batches/C_signals.txt --parallel 2
+
+# --- 256 GPUs, 10 seeds per algorithm (compare with B: *_c256_estimate)
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed4
+python scripts/train.py --algo ppo --seed 5 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed5
+python scripts/train.py --algo dqn --seed 5 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed5
+python scripts/train.py --algo ppo --seed 6 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed6
+python scripts/train.py --algo dqn --seed 6 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed6
+python scripts/train.py --algo ppo --seed 7 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed7
+python scripts/train.py --algo dqn --seed 7 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed7
+python scripts/train.py --algo ppo --seed 8 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed8
+python scripts/train.py --algo dqn --seed 8 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed8
+python scripts/train.py --algo ppo --seed 9 --capacity 256 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c256_signals/seed9
+python scripts/train.py --algo dqn --seed 9 --capacity 256 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c256_signals/seed9
+
+# --- 128 GPUs, 5 seeds per algorithm (compare with B: *_c128_estimate)
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c128_signals/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c128_signals/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 128 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c128_signals/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 128 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c128_signals/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 128 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c128_signals/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 128 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c128_signals/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 128 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c128_signals/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 128 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c128_signals/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 128 --duration-info signals --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/C/ppo_c128_signals/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 128 --duration-info signals --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/C/dqn_c128_signals/seed4

@@ -28,21 +28,35 @@ def mlp(n_in, hidden, n_out):
     return nn.Sequential(*layers)
 
 
+def extra_per_slot(obs_dim, window):
+    """Extra inputs per queue slot beyond the standard 5 (0 for the 52-value observation;
+    8 with duration_info="signals", where they follow the 2 global values)."""
+    rest = obs_dim - window * SLOT_FEATURES - GLOBAL_FEATURES
+    if rest < 0 or rest % window:
+        raise ValueError(f"observation size {obs_dim} does not fit a {window}-slot layout")
+    return rest // window
+
+
 class SlotScorer(nn.Module):
-    def __init__(self, window=10, hidden=(64, 64)):
+    def __init__(self, window=10, hidden=(64, 64), extra=0):
         super().__init__()
-        self.window = window
-        self.slot_net = mlp(SLOT_FEATURES + GLOBAL_FEATURES, hidden, 1)
-        self.wait_net = mlp(SLOT_FEATURES + GLOBAL_FEATURES, hidden, 1)
+        self.window, self.extra = window, int(extra)
+        per_job = SLOT_FEATURES + self.extra
+        self.slot_net = mlp(per_job + GLOBAL_FEATURES, hidden, 1)
+        self.wait_net = mlp(per_job + GLOBAL_FEATURES, hidden, 1)
 
     def forward(self, obs):
         b = obs.shape[0]
         n = self.window * SLOT_FEATURES
         slots = obs[:, :n].reshape(b, self.window, SLOT_FEATURES)
         glob = obs[:, n:n + GLOBAL_FEATURES]
+        filled = slots[:, :, :1]                                         # slot-filled flag
+        if self.extra:
+            e = n + GLOBAL_FEATURES
+            extra = obs[:, e:e + self.window * self.extra].reshape(b, self.window, self.extra)
+            slots = torch.cat([slots, extra], dim=2)
         x = torch.cat([slots, glob.unsqueeze(1).expand(b, self.window, GLOBAL_FEATURES)], dim=2)
         job_scores = self.slot_net(x).squeeze(-1)                       # (b, window)
-        filled = slots[:, :, :1]                                         # slot-filled flag
         pooled = (slots * filled).sum(1) / filled.sum(1).clamp(min=1.0)  # mean over filled slots
         wait_score = self.wait_net(torch.cat([pooled, glob], dim=1))     # (b, 1)
         return torch.cat([job_scores, wait_score], dim=1)               # (b, window + 1)
@@ -60,7 +74,7 @@ class DuelingSlotQ(nn.Module):
     def __init__(self, obs_dim, window=10, hidden=(64, 64), value_hidden=(128, 128)):
         super().__init__()
         self.value = mlp(obs_dim, value_hidden, 1)
-        self.adv = SlotScorer(window, hidden)
+        self.adv = SlotScorer(window, hidden, extra=extra_per_slot(obs_dim, window))
 
     def forward(self, obs):
         a = self.adv(obs)
@@ -69,7 +83,8 @@ class DuelingSlotQ(nn.Module):
 
 def make_q_network(arch, obs_dim, n_actions, hidden):
     if arch == "slot":
-        return SlotScorer(window=n_actions - 1, hidden=tuple(hidden))
+        return SlotScorer(window=n_actions - 1, hidden=tuple(hidden),
+                          extra=extra_per_slot(obs_dim, n_actions - 1))
     if arch == "slot_dueling":
         return DuelingSlotQ(obs_dim, window=n_actions - 1, hidden=tuple(hidden))
     if arch == "mlp":
@@ -96,6 +111,8 @@ if MaskableActorCriticPolicy is not None:
 
         def _build(self, lr_schedule):
             super()._build(lr_schedule)
-            self.action_net = SlotScorer(self.action_space.n - 1, self._slot_hidden)
+            window = self.action_space.n - 1
+            extra = extra_per_slot(self.observation_space.shape[0], window)
+            self.action_net = SlotScorer(window, self._slot_hidden, extra=extra)
             # rebuild the optimizer so it trains the new action head
             self.optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)

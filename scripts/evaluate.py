@@ -78,8 +78,9 @@ def main():
                 if name == "sjf_pred" and "pred_duration" not in jobs.columns:
                     continue
                 base[name] = np.array([run_episode(env, pol, start=int(s))[0]["avg_wait_h"] for s in starts])
-                rows += [{"setting": "baseline", "policy": name, "seed": -1, "episode": e, "start": int(s),
-                          "avg_wait_h": w} for e, (s, w) in enumerate(zip(starts, base[name]))]
+                rows += [{"setting": "baseline", "policy": name, "capacity": key["capacity"], "seed": -1,
+                          "episode": e, "start": int(s), "avg_wait_h": w}
+                         for e, (s, w) in enumerate(zip(starts, base[name]))]
             envs[env_key] = (jobs, starts, base)
         jobs, starts, base = envs[env_key]
         env = make_env(jobs, "test", key["capacity"], key["duration_info"], 1024, no_wait=key["no_wait"])
@@ -94,7 +95,8 @@ def main():
             for e, s in enumerate(starts):
                 m, _ = run_episode(env, pol, start=int(s))
                 w.append(m["avg_wait_h"])
-                rows.append({"setting": label, "policy": label, "seed": d.name, "episode": e, "start": int(s), **m})
+                rows.append({"setting": label, "policy": label, "capacity": key["capacity"], "seed": d.name,
+                             "episode": e, "start": int(s), **m})
             waits.append(w)
             wait_share.append(pol.waits / max(pol.steps, 1))
         waits = np.array(waits)

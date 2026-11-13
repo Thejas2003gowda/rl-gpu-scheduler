@@ -108,7 +108,7 @@ Python 3.10 or newer (tested with 3.13 and 3.14).
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt        # simulator, baselines, predictors
 pip install -r requirements-rl.txt     # DQN (PyTorch) and MaskablePPO (sb3-contrib)
-python -m pytest -q                    # 30 tests
+python -m pytest -q                    # 36 tests
 ```
 
 ## Data
@@ -160,6 +160,12 @@ python scripts/evaluate.py --runs runs/B/dqn_c256_estimate runs/B/ppo_c256_estim
 python scripts/evaluate.py --runs runs/B/dqn_c256_estimate runs/B/ppo_c256_estimate \
     --jobs-csv data/philly_jobs.csv --vc 11cb48 --capacity 72 --overlapping --out results/rl/E3_11cb48_overlapping
 
+# 5b. E1b, run-time signals as direct agent inputs (pre-registered addendum)
+python scripts/run_many.py batches/C_signals.txt --parallel 2
+python scripts/evaluate.py --runs runs/C/* --out results/rl/C_test
+python scripts/compare_settings.py --a results/rl/C_test --b results/rl/B_test \
+    --a-info signals --b-info estimate --out results/rl/C_signals_vs_estimate
+
 # 6. Exploratory analyses of the main test (no training needed)
 python scripts/analyze_load.py --report results/rl/B_test --out results/analysis/load
 python scripts/summarize_secondary.py --report results/rl/B_test --out results/analysis/secondary
@@ -177,7 +183,7 @@ Training uses the CPU; one run takes 1-2 minutes on a recent laptop.
 | Simulator | Event-driven replay of one pool of `C` GPUs. Jobs arrive at their trace submit times, need all their GPUs at once (gang scheduling), and run for their trace duration. No preemption. |
 | Decision point | Whenever at least one job in the visible window fits in the free GPUs. Time jumps between arrivals and completions. |
 | State (52 values in [0, 1]) | For each of the first 10 queued jobs: slot filled, GPUs requested / C, fits now, log run-time feature, log time waited. Plus free GPUs / C and log queue length. Fixed scales, so inputs mean the same in 256- and 1,024-job episodes. |
-| Run-time feature | `estimate`: user's past average (realistic). `predicted`: boosted-tree model on submit-time features (realistic). `oracle`: true run time (reference). `none`: 0. |
+| Run-time feature | `estimate`: user's past average (realistic). `predicted`: boosted-tree model on submit-time features (realistic). `oracle`: true run time (reference). `none`: 0. `signals`: user's past average plus 8 extra inputs per job (the user's job count, median, spread, last-2 and same-GPU-count run times, failure share, time of day), appended after the 2 global values (132 inputs in all). |
 | Action (Discrete(11)) | 0-9: start the job in that queue slot. 10: WAIT until the next arrival or completion. Invalid actions are masked (`env.action_masks()`). |
 | Reward | Minus the waiting time accrued by all queued jobs since the last step (scaled). Summed over an episode it equals minus the total waiting time, so maximizing return minimizes average job completion time. An episode-end bounded-slowdown reward (`bsld`) is also available. |
 | Episodes | Consecutive jobs from the trace. Training: 256 jobs. Testing: 1,024 jobs. |
@@ -292,11 +298,11 @@ gpusched/
   env.py           GPUSchedEnv (Gymnasium environment)
   baselines.py     Rule-based policies and run_episode()
   metrics.py       Episode metrics, IQM, bootstrap confidence intervals
-  predict.py       Leak-free run-time features, simple predictors, boosted-tree model
+  predict.py       Leak-free run-time features, simple predictors, boosted-tree model, agent signals
   dqn.py           DQN with invalid-action masking, optional n-step returns (PyTorch)
   nets.py          Per-job scorer, dueling variant, MaskablePPO policy
   experiment.py    Data splits, environments, loading agents
-  stats.py         Success criterion (IQM over seeds, seed and episode bootstrap), gap closed
+  stats.py         Success criterion (IQM over seeds, seed and episode bootstrap), gap closed, differences
 scripts/
   prepare_philly.py       Parse cluster_job_log -> data/philly_jobs.csv
   build_predictions.py    Train and compare run-time predictors -> pred_duration per job
@@ -306,6 +312,7 @@ scripts/
   diagnose_architecture.py  Can a network imitate SJF(true)? (flat MLP vs per-job scorer)
   train.py                Train DQN or MaskablePPO for one seed; best checkpoint on validation
   evaluate.py             Test-period evaluation and success criterion
+  compare_settings.py     Same agents with two information levels: difference and its CI
   run_many.py             Run a batch file of training commands in parallel
   summarize_runs.py       One line per training run (validation results)
   smoke_maskable_ppo.py   Quick check that MaskablePPO trains on the environment
@@ -316,7 +323,7 @@ scripts/
 configs/           Frozen hyperparameters (dqn.json, ppo.json) and the reasons for them
 batches/           Training commands for each experiment batch
 results/           Committed results (baselines, trace check, predictors, validation, RL tests, analyses, figures)
-tests/             30 tests (simulator, rewards, warm start, statistics, predictors, DQN, networks)
+tests/             36 tests (simulator, rewards, warm start, statistics, predictors, DQN, networks, signals)
 PREREGISTRATION.md Test plan fixed before any trained agent was evaluated on the test period
 ```
 

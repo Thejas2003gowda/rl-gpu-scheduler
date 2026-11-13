@@ -65,7 +65,7 @@ def main():
     ap.add_argument("--jobs-csv", default=DEFAULT_CSV)
     ap.add_argument("--vc", default="6214e9")
     ap.add_argument("--capacity", type=int, default=256)
-    ap.add_argument("--duration-info", default="estimate", choices=["estimate", "predicted", "oracle", "none"])
+    ap.add_argument("--duration-info", default="estimate", choices=["estimate", "predicted", "oracle", "none", "signals"])
     ap.add_argument("--no-wait", action="store_true", help="ablation: remove the WAIT action")
     ap.add_argument("--timesteps", type=int, default=1_000_000)
     ap.add_argument("--eval-every", type=int, default=50_000)
