@@ -1,0 +1,9 @@
+{
+  "gain_points": 3.821811100292109,
+  "keep_predicted_level": true,
+  "model_config": {
+    "all_vcs": true,
+    "loss": "squared_error",
+    "max_leaf_nodes": 15
+  }
+}

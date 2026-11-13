@@ -1,0 +1,13 @@
+{
+  "source": "philly vc=6214e9",
+  "capacity_gpus": 208,
+  "offered_load_test": 0.507230235331628,
+  "jobs_total": 51955,
+  "jobs_test": 15587,
+  "jobs_dropped_too_big": 0,
+  "episodes": 30,
+  "episode_len": 1024,
+  "window": 10,
+  "train_frac": 0.7,
+  "seed": 0
+}
