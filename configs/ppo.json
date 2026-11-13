@@ -1,0 +1,14 @@
+{
+  "arch": "slot",
+  "slot_hidden": [64, 64],
+  "net_arch": [128, 128],
+  "learning_rate": 0.0003,
+  "n_steps": 2048,
+  "batch_size": 256,
+  "n_epochs": 10,
+  "gamma": 1.0,
+  "gae_lambda": 0.95,
+  "ent_coef": 0.01,
+  "clip_range": 0.2,
+  "reward_multiplier": 0.1
+}

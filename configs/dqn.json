@@ -1,0 +1,18 @@
+{
+  "arch": "slot",
+  "hidden": [64, 64],
+  "lr": 0.0001,
+  "gamma": 0.99,
+  "buffer_size": 200000,
+  "batch_size": 128,
+  "learning_starts": 5000,
+  "train_freq": 4,
+  "target_update_interval": 5000,
+  "eps_start": 1.0,
+  "eps_end": 0.05,
+  "eps_fraction": 0.2,
+  "max_grad_norm": 10.0,
+  "reward_multiplier": 0.1,
+  "double": true,
+  "n_step": 1
+}
