@@ -1,0 +1,78 @@
+# Batch B: main RL experiments (pre-registered in PREREGISTRATION.md). Validation-only during training.
+# Ordered by importance: main test first, then scarcity tests, then information levels (E1).
+# 70 runs; about 1 h at --parallel 2 on a recent laptop CPU. Safe to stop and restart (finished runs are skipped).
+# Run:  python scripts/run_many.py batches/B_main.txt --parallel 2
+
+# --- Main test: 256 GPUs, user-average run times, 10 seeds per algorithm
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed4
+python scripts/train.py --algo ppo --seed 5 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed5
+python scripts/train.py --algo dqn --seed 5 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed5
+python scripts/train.py --algo ppo --seed 6 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed6
+python scripts/train.py --algo dqn --seed 6 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed6
+python scripts/train.py --algo ppo --seed 7 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed7
+python scripts/train.py --algo dqn --seed 7 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed7
+python scripts/train.py --algo ppo --seed 8 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed8
+python scripts/train.py --algo dqn --seed 8 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed8
+python scripts/train.py --algo ppo --seed 9 --capacity 256 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_estimate/seed9
+python scripts/train.py --algo dqn --seed 9 --capacity 256 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c256_estimate/seed9
+# --- Scarcity tests: 128 and 192 GPUs, user-average run times, 5 seeds per algorithm
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_estimate/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c128_estimate/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 128 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_estimate/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 128 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c128_estimate/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 128 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_estimate/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 128 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c128_estimate/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 128 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_estimate/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 128 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c128_estimate/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 128 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_estimate/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 128 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c128_estimate/seed4
+python scripts/train.py --algo ppo --seed 0 --capacity 192 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c192_estimate/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 192 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c192_estimate/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 192 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c192_estimate/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 192 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c192_estimate/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 192 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c192_estimate/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 192 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c192_estimate/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 192 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c192_estimate/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 192 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c192_estimate/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 192 --duration-info estimate --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c192_estimate/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 192 --duration-info estimate --no-wait --timesteps 200000 --eval-every 10000 --config configs/dqn.json --out runs/B/dqn_c192_estimate/seed4
+# --- E1 information levels (PPO): none / predicted / true at 256 and 128 GPUs, 5 seeds
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_predicted/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 256 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_predicted/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 256 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_predicted/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 256 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_predicted/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 256 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_predicted/seed4
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_oracle/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_oracle/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_oracle/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_oracle/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_oracle/seed4
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_none/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 256 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_none/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 256 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_none/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 256 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_none/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 256 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c256_none/seed4
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_predicted/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 128 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_predicted/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 128 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_predicted/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 128 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_predicted/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 128 --duration-info predicted --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_predicted/seed4
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_oracle/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_oracle/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_oracle/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_oracle/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_oracle/seed4
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_none/seed0
+python scripts/train.py --algo ppo --seed 1 --capacity 128 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_none/seed1
+python scripts/train.py --algo ppo --seed 2 --capacity 128 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_none/seed2
+python scripts/train.py --algo ppo --seed 3 --capacity 128 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_none/seed3
+python scripts/train.py --algo ppo --seed 4 --capacity 128 --duration-info none --timesteps 500000 --eval-every 25000 --config configs/ppo.json --out runs/B/ppo_c128_none/seed4
