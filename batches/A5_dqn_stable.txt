@@ -1,0 +1,4 @@
+# Batch A5: last DQN stability check (no WAIT, slower learning and target). Validation only.
+
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --no-wait --set lr=0.0001 --set target_update_interval=5000 --set gamma=0.99 --out runs/A5/dqn_slot_c256_oracle_nowait_slow_g0.99/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --no-wait --set lr=0.0001 --set target_update_interval=5000 --set gamma=1.0 --out runs/A5/dqn_slot_c256_oracle_nowait_slow_g1.0/seed0

@@ -1,0 +1,3 @@
+run,algo,GPUs,info,network,gamma,best val change %,last val change %,SJF(true) val %,WAIT share (best),best step,minutes
+dqn_slot_c256_oracle_n10/seed0,dqn,256,oracle,slot,1.0,20.62,80.85,-20.35,0.381,50000,4.8
+dqn_slot_c256_oracle_nowait/seed0,dqn,256,oracle,slot,1.0,-12.51,-2.95,-20.35,0.0,25000,4.8

@@ -1,0 +1,8 @@
+# Batch A3: DQN with the dueling per-job network (arch=slot_dueling), validation only.
+# True run times; 2 cluster sizes x gamma {0.99, 1.0} x 1 seed = 4 runs of 300k steps.
+# Run:  python scripts/run_many.py batches/A3_dqn_dueling.txt --parallel 2
+
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot_dueling --set hidden=[64,64] --set gamma=0.99 --out runs/A3/dqn_dueling_c256_oracle_g0.99/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot_dueling --set hidden=[64,64] --set gamma=1.0 --out runs/A3/dqn_dueling_c256_oracle_g1.0/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot_dueling --set hidden=[64,64] --set gamma=0.99 --out runs/A3/dqn_dueling_c128_oracle_g0.99/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot_dueling --set hidden=[64,64] --set gamma=1.0 --out runs/A3/dqn_dueling_c128_oracle_g1.0/seed0

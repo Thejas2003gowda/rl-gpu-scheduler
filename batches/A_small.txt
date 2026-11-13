@@ -1,0 +1,12 @@
+# Batch A (small): capability check + discount factor, validation only.
+# True run times; 2 algorithms x 2 cluster sizes x gamma {0.99, 1.0} x 1 seed = 8 runs of 500k steps.
+# Run:  python scripts/run_many.py batches/A_small.txt --parallel 2
+
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --set gamma=0.99 --out runs/A/ppo_c256_oracle_g0.99/seed0
+python scripts/train.py --algo ppo --seed 0 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --set gamma=1.0 --out runs/A/ppo_c256_oracle_g1.0/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/dqn.json --set gamma=0.99 --out runs/A/dqn_c256_oracle_g0.99/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --out runs/A/dqn_c256_oracle_g1.0/seed0
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --set gamma=0.99 --out runs/A/ppo_c128_oracle_g0.99/seed0
+python scripts/train.py --algo ppo --seed 0 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/ppo.json --set gamma=1.0 --out runs/A/ppo_c128_oracle_g1.0/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/dqn.json --set gamma=0.99 --out runs/A/dqn_c128_oracle_g0.99/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info oracle --timesteps 500000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --out runs/A/dqn_c128_oracle_g1.0/seed0

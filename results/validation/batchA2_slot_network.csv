@@ -1,0 +1,9 @@
+run,algo,GPUs,info,network,gamma,best val change %,last val change %,SJF(true) val %,WAIT share (best),best step,minutes
+dqn_slot_c128_oracle_g0.99/seed0,dqn,128,oracle,slot,0.99,-3.24,-3.24,-17.56,0.307,300000,5.6
+dqn_slot_c128_oracle_g1.0/seed0,dqn,128,oracle,slot,1.0,-5.74,-3.15,-17.56,0.193,250000,5.6
+dqn_slot_c256_oracle_g0.99/seed0,dqn,256,oracle,slot,0.99,-7.86,-0.53,-20.35,0.257,25000,5.2
+dqn_slot_c256_oracle_g1.0/seed0,dqn,256,oracle,slot,1.0,-10.29,-3.46,-20.35,0.221,275000,5.3
+ppo_slot_c128_oracle_g0.99/seed0,ppo,128,oracle,slot,0.99,-18.58,-17.71,-17.56,0.0,125000,5.8
+ppo_slot_c128_oracle_g1.0/seed0,ppo,128,oracle,slot,1.0,-19.24,-18.28,-17.56,0.0,250000,5.6
+ppo_slot_c256_oracle_g0.99/seed0,ppo,256,oracle,slot,0.99,-3.95,-3.95,-20.35,0.0,300000,5.2
+ppo_slot_c256_oracle_g1.0/seed0,ppo,256,oracle,slot,1.0,-20.6,-20.6,-20.35,0.0,300000,5.1

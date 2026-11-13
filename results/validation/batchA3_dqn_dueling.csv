@@ -1,0 +1,5 @@
+run,algo,GPUs,info,network,gamma,best val change %,last val change %,SJF(true) val %,WAIT share (best),best step,minutes
+dqn_dueling_c128_oracle_g0.99/seed0,dqn,128,oracle,slot_dueling,0.99,-2.94,7.19,-17.56,0.266,25000,6.3
+dqn_dueling_c128_oracle_g1.0/seed0,dqn,128,oracle,slot_dueling,1.0,-6.85,7.11,-17.56,0.174,25000,6.3
+dqn_dueling_c256_oracle_g0.99/seed0,dqn,256,oracle,slot_dueling,0.99,6.33,15.8,-20.35,0.263,100000,6.7
+dqn_dueling_c256_oracle_g1.0/seed0,dqn,256,oracle,slot_dueling,1.0,6.89,14.96,-20.35,0.276,25000,6.9

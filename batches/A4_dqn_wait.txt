@@ -1,0 +1,5 @@
+# Batch A4: why does DQN choose WAIT? Validation only, true run times, 256 GPUs, gamma 1.0.
+# (a) per-job network without the WAIT action; (b) per-job network with 10-step returns.
+
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set gamma=1.0 --no-wait --out runs/A4/dqn_slot_c256_oracle_nowait/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set gamma=1.0 --set n_step=10 --out runs/A4/dqn_slot_c256_oracle_n10/seed0
