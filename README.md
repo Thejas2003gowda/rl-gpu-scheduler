@@ -48,6 +48,19 @@ episodes.
 | 128 | **-7.4% [-12.4, -3.3]** (met) | -0.2% [-5.1, +3.3] | -6.4% (SJF, predicted) | -23.5% |
 | 192 | -4.5% [-9.6, +0.8] | +1.5% [-3.4, +9.4] | -6.2% (smallest-GPU-first) | -11.4% |
 
+**Busier vs lighter test episodes** (exploratory; the same 15 episodes split at the median
+offered load; [`results/analysis/load/`](results/analysis/load/)):
+
+| Policy | 256 GPUs: lighter / busier half | 128 GPUs: lighter / busier half |
+|---|---|---|
+| DQN | -1.9% / -2.7% | -5.4% / -8.6% |
+| PPO | +0.2% / +0.6% | -1.9% / +0.9% |
+| SJF (predicted) | -0.4% / -1.7% | -2.5% / -9.1% |
+| SJF (true run times) | -7.3% / -15.2% | -20.2% / -25.7% |
+
+Busier episodes hold about twice the possible gain at 256 GPUs, but DQN's advantage
+barely grows; at 128 GPUs simple SJF rules gain as much as DQN in the busier half.
+
 **Value of run-time information** (PPO, 5 seeds; share of the first-fit to SJF(true) gap
 closed):
 
@@ -70,6 +83,12 @@ agents from the main test, no retraining):
 | PPO | +1.4% [-10.3, +12.8] (not met) | -1.0% [-4.4, +2.6] |
 | Best realistic rule | -1.5% (random) | -2.5% (SJF, user average) |
 | SJF (true) | -5.9% | -9.6% |
+
+**Other measures** ([`results/analysis/secondary/`](results/analysis/secondary/)): average,
+median and P99 job completion time, bounded slowdown and GPU utilization follow the
+waiting-time results. At 256 GPUs DQN cuts average completion time by 1.3% and bounded
+slowdown by 3.9%; no policy moves P99 completion time by more than 3.3% or utilization by
+more than 3 points.
 
 **Takeaways.** Realistic run-time estimates order nearby jobs barely better than a coin
 flip (52-54% on test), so neither rules nor agents recover much of the gain that true run
@@ -141,7 +160,11 @@ python scripts/evaluate.py --runs runs/B/dqn_c256_estimate runs/B/ppo_c256_estim
 python scripts/evaluate.py --runs runs/B/dqn_c256_estimate runs/B/ppo_c256_estimate \
     --jobs-csv data/philly_jobs.csv --vc 11cb48 --capacity 72 --overlapping --out results/rl/E3_11cb48_overlapping
 
-# 6. Figures (from committed result files only)
+# 6. Exploratory analyses of the main test (no training needed)
+python scripts/analyze_load.py --report results/rl/B_test --out results/analysis/load
+python scripts/summarize_secondary.py --report results/rl/B_test --out results/analysis/secondary
+
+# 7. Figures (from committed result files only)
 python scripts/make_figures.py
 ```
 
@@ -288,9 +311,11 @@ scripts/
   smoke_maskable_ppo.py   Quick check that MaskablePPO trains on the environment
   plot_paired_figure.py   Paired-comparison figure from a paired.csv
   make_figures.py         Summary figures -> results/figures/
+  analyze_load.py         Exploratory: advantage in busier vs lighter test episodes
+  summarize_secondary.py  Completion-time percentiles, slowdown and utilization per policy
 configs/           Frozen hyperparameters (dqn.json, ppo.json) and the reasons for them
 batches/           Training commands for each experiment batch
-results/           Committed results (baselines, trace check, predictors, validation, RL tests, figures)
+results/           Committed results (baselines, trace check, predictors, validation, RL tests, analyses, figures)
 tests/             30 tests (simulator, rewards, warm start, statistics, predictors, DQN, networks)
 PREREGISTRATION.md Test plan fixed before any trained agent was evaluated on the test period
 ```
