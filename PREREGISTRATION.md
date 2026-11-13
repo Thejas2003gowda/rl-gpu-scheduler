@@ -42,3 +42,24 @@ and validation-only training runs.
 * Later experiments (WAIT ablation with PPO, second virtual cluster 11cb48, 8-GPU machines)
   are added to this file before their test evaluation.
 
+---
+
+## Addendum: E3 (second virtual cluster)
+
+Added after the main test results and before any E3 result.
+
+* **Question (RQ3):** do the main agents, trained on 6214e9 at 256 GPUs with user-average
+  run times, still beat first-fit on another virtual cluster without retraining?
+* **Agents:** `runs/B/dqn_c256_estimate` and `runs/B/ppo_c256_estimate` (10 seeds each,
+  best validation checkpoints). No retraining, no tuning.
+* **Cluster:** 11cb48, its last 30% of jobs by submit time (5,807 jobs), warm start.
+* **Size rule (from the original design, fixed before any 11cb48 result):** the cluster size
+  that gives 11cb48's test period the same offered load as the main test (0.412 at 256
+  GPUs), rounded to a multiple of 8: **72 GPUs** (load 0.424).
+* **Main E3 result:** the 5 non-overlapping 1,024-job episodes, same success criterion
+  form as the main test. With only 5 episodes the CIs will be wide; reported as is.
+  Robustness: 30 overlapping episodes.
+* **Already seen:** one pipeline smoke check of the `--vc/--capacity` options on 11cb48 at
+  72 GPUs with two throwaway agents from a 4k/6k-step smoke test. Not used for any choice.
+* **Dropped:** the PPO WAIT ablation (PPO chose WAIT in 0% of decisions in every
+  setting of batch B, so removing WAIT cannot change it).
