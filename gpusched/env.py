@@ -1,22 +1,30 @@
 """GPU cluster scheduling environment (Gymnasium API).
 
-The cluster is a single pool of ``capacity`` GPUs. Jobs arrive at their trace
-submit times. Each job needs all of its GPUs at once (gang scheduling) and
-holds them for its duration. There is no preemption and no placement on
-specific machines (locality is ignored; see README "Limitations").
+Jobs arrive at their trace submit times. Each job needs all of its GPUs at
+once (gang scheduling) and holds them for its duration. There is no preemption.
+
+Cluster model:
+    machine_gpus=None (default): one pool of ``capacity`` GPUs; a job fits when
+        enough GPUs are free anywhere (no locality).
+    machine_gpus=m: ``capacity / m`` machines of m GPUs each. A job of up to m
+        GPUs must fit on one machine; a larger job needs ceil(gpus / m) empty
+        machines. Placement is a fixed rule, never chosen by the agent:
+        best-fit (the machine with the fewest free GPUs that still fits; ties
+        -> lowest index); larger jobs take the lowest-numbered empty machines.
+        With m = capacity this is exactly the pool model.
 
 Warm start (optional, ``warm_start=True`` with a ``history`` table): each
 episode begins with the background jobs that, according to the trace, were
 still running when the episode's first job arrived. They are assumed to have
 started at their submit time (the trace does not give their real waits), are
-added in submission order until the cluster is full (the rest are skipped and
+added in submission order while they fit (same placement rule; the rest are skipped and
 counted in ``bg_overflow_jobs``), hold their GPUs until they finish, and are
 NOT included in the episode's metrics or its end condition. Utilization does
 count them, because they really occupy GPUs.
 
 Decision points: the simulator jumps from event to event (arrivals and
 completions). It stops and asks the agent for an action whenever at least one
-job in the visible window fits in the free GPUs.
+job in the visible window fits (in the free GPUs, or on a machine).
 
 Action (Discrete(window + 1)):
     0 .. window-1 : start the job in that queue slot (queue is in arrival order)
@@ -80,7 +88,7 @@ class GPUSchedEnv(gym.Env):
 
     def __init__(self, jobs, capacity, window=10, episode_len=256, reward_mode="wait",
                  duration_info="estimate", reward_scale=36_000.0, invalid_penalty=0.1,
-                 warm_start=False, history=None, no_wait=False, render_mode=None):
+                 warm_start=False, history=None, no_wait=False, machine_gpus=None, render_mode=None):
         if reward_mode not in REWARD_MODES:
             raise ValueError(f"reward_mode must be one of {REWARD_MODES}")
         if duration_info not in DURATION_INFO:
@@ -105,6 +113,11 @@ class GPUSchedEnv(gym.Env):
             raise ValueError(f"Only {len(jobs)} usable jobs; need at least episode_len={episode_len}")
 
         self.capacity = int(capacity)
+        self.machine_gpus = None if machine_gpus is None else int(machine_gpus)
+        if self.machine_gpus is not None:
+            if self.machine_gpus <= 0 or self.capacity % self.machine_gpus:
+                raise ValueError(f"capacity {capacity} is not a whole number of {machine_gpus}-GPU machines")
+            self.n_machines = self.capacity // self.machine_gpus
         self.window = int(window)
         self.episode_len = int(episode_len)
         self.reward_mode = reward_mode
@@ -167,6 +180,10 @@ class GPUSchedEnv(gym.Env):
 
         self.now = 0.0
         self.free = self.capacity
+        if self.machine_gpus is not None:
+            self.mfree = np.full(self.n_machines, self.machine_gpus, dtype=int)  # free GPUs per machine
+            self.placement = {}   # running job -> [(machine, gpus), ...]
+            self._refresh_machines()
         self.queue = []      # job indices, arrival order; slot i = queue[i]
         self.running = []    # heap of (finish time, job index)
         self.next_arrival = 0
@@ -177,6 +194,7 @@ class GPUSchedEnv(gym.Env):
         self._accrued = 0.0
         self.busy_gpu_seconds = 0.0
         self.bg_gpus = []          # GPUs held by each background job
+        self.bg_place = []         # and where (machine model)
         self.bg_overflow_jobs = 0
         if self.warm_start:
             self._add_background(self._all_submit[start])
@@ -222,7 +240,7 @@ class GPUSchedEnv(gym.Env):
         """Boolean mask of valid actions (used by sb3_contrib MaskablePPO)."""
         mask = np.zeros(self.window + 1, dtype=bool)
         for slot, job in enumerate(self.queue[: self.window]):
-            mask[slot] = self.gpus[job] <= self.free
+            mask[slot] = self._fits(self.gpus[job])
         mask[self.WAIT] = bool(self.running) or self.next_arrival < self.episode_len
         if self.no_wait and mask[: self.WAIT].any():
             mask[self.WAIT] = False
@@ -238,7 +256,7 @@ class GPUSchedEnv(gym.Env):
     def visible_jobs(self):
         """Jobs in the visible window, for rule-based baselines."""
         jobs = [
-            {"slot": slot, "job": j, "gpus": int(self.gpus[j]), "fits": bool(self.gpus[j] <= self.free),
+            {"slot": slot, "job": j, "gpus": int(self.gpus[j]), "fits": bool(self._fits(self.gpus[j])),
              "true_duration": float(self.dur[j]), "est_duration": float(self.est[j]),
              "waited": float(self.now - self.submit[j])}
             for slot, j in enumerate(self.queue[: self.window])
@@ -264,6 +282,8 @@ class GPUSchedEnv(gym.Env):
     def _start_job(self, slot):
         job = self.queue.pop(slot)
         self.free -= int(self.gpus[job])
+        if self.machine_gpus is not None:
+            self.placement[job] = self._place(int(self.gpus[job]))
         self.start_time[job] = self.now
         heapq.heappush(self.running, (self.now + self.dur[job], job))
 
@@ -283,8 +303,12 @@ class GPUSchedEnv(gym.Env):
             t_done, job = heapq.heappop(self.running)
             if job < 0:  # background job (warm start): free GPUs, not counted
                 self.free += self.bg_gpus[-job - 1]
+                if self.machine_gpus is not None:
+                    self._release(self.bg_place[-job - 1])
                 continue
             self.free += int(self.gpus[job])
+            if self.machine_gpus is not None:
+                self._release(self.placement.pop(job))
             self.finish_time[job] = t_done
             self.n_finished += 1
         self._admit_arrivals()
@@ -294,15 +318,52 @@ class GPUSchedEnv(gym.Env):
         idx = np.flatnonzero((self._h_submit < t_abs) & (self._h_end > t_abs))
         for i in idx:  # already in submission order
             g = int(self._h_gpus[i])
-            if g > self.free:
+            if not self._fits(g):
                 self.bg_overflow_jobs += 1
                 continue
             self.free -= g
             self.bg_gpus.append(g)
+            self.bg_place.append(self._place(g) if self.machine_gpus is not None else None)
             heapq.heappush(self.running, (self._h_end[i] - t_abs, -len(self.bg_gpus)))
 
+    # ----------------------------------------------------- cluster model
+    def _fits(self, g):
+        if self.machine_gpus is None:
+            return g <= self.free
+        if g <= self.machine_gpus:
+            return g <= self._max_free
+        return self._n_empty >= -(-g // self.machine_gpus)
+
+    def _refresh_machines(self):
+        self._max_free = int(self.mfree.max())
+        self._n_empty = int((self.mfree == self.machine_gpus).sum())
+
+    def _place(self, g):
+        """Fixed placement rule (best-fit); call only when the job fits."""
+        m = self.machine_gpus
+        if g <= m:
+            room = np.where(self.mfree >= g, self.mfree, m + 1)
+            i = int(np.argmin(room))  # fewest free GPUs that still fit; ties -> lowest index
+            self.mfree[i] -= g
+            parts = [(i, g)]
+        else:
+            empty = np.flatnonzero(self.mfree == m)[: -(-g // m)]
+            parts, left = [], g
+            for i in empty:
+                take = min(m, left)
+                self.mfree[i] -= take
+                parts.append((int(i), take))
+                left -= take
+        self._refresh_machines()
+        return parts
+
+    def _release(self, parts):
+        for i, take in parts:
+            self.mfree[i] += take
+        self._refresh_machines()
+
     def _any_fit(self):
-        return any(self.gpus[j] <= self.free for j in self.queue[: self.window])
+        return any(self._fits(self.gpus[j]) for j in self.queue[: self.window])
 
     def _advance_to_decision(self):
         """Move time forward until a decision is needed. Returns True when the episode is over."""
@@ -328,7 +389,7 @@ class GPUSchedEnv(gym.Env):
             b = slot * SLOT_FEATURES
             obs[b] = 1.0
             obs[b + 1] = self.gpus[job] / self.capacity
-            obs[b + 2] = float(self.gpus[job] <= self.free)
+            obs[b + 2] = float(self._fits(self.gpus[job]))
             obs[b + 3] = math.log1p(self._duration_feature(job)) / LOG_MAX_TIME
             obs[b + 4] = math.log1p(max(self.now - self.submit[job], 0.0)) / LOG_MAX_TIME
         g = self.window * SLOT_FEATURES

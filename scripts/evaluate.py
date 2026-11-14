@@ -44,6 +44,8 @@ def main():
     ap.add_argument("--jobs-csv", default=None, help="test on this job table instead of the training one")
     ap.add_argument("--vc", default=None, help="test on this virtual cluster instead of the training one")
     ap.add_argument("--capacity", type=int, default=None, help="test at this cluster size instead")
+    ap.add_argument("--machine-gpus", type=int, default=None,
+                    help="test on machines with this many GPUs instead of the cluster model trained on")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     out = Path(args.out)
@@ -55,11 +57,12 @@ def main():
         if not seeds:
             raise SystemExit(f"no seed*/config.json under {run}")
         cfgs = [json.loads(p.read_text()) for p in seeds]
-        key = {k: cfgs[0][k] for k in ("jobs_csv", "vc", "capacity", "duration_info", "no_wait")}
+        key = {k: cfgs[0].get(k) for k in ("jobs_csv", "vc", "capacity", "duration_info", "no_wait",
+                                           "machine_gpus")}
         for c in cfgs:
-            if any(c[k] != v for k, v in key.items()):
+            if any(c.get(k) != v for k, v in key.items()):
                 raise SystemExit(f"seeds in {run} do not share the same settings")
-        for name in ("jobs_csv", "vc", "capacity"):  # E3: evaluate elsewhere than trained
+        for name in ("jobs_csv", "vc", "capacity", "machine_gpus"):  # E2/E3: evaluate elsewhere than trained
             if getattr(args, name) is not None:
                 key[name] = getattr(args, name)
         settings[Path(run).name] = (key, [p.parent for p in seeds])
@@ -68,22 +71,24 @@ def main():
     envs = {}
     rows, report = [], {}
     for label, (key, seed_dirs) in settings.items():
-        env_key = (key["jobs_csv"], key["vc"], key["capacity"])
+        env_key = (key["jobs_csv"], key["vc"], key["capacity"], key["machine_gpus"])
         if env_key not in envs:
             jobs = load_vc_jobs(key["jobs_csv"], key["vc"])
-            env = make_env(jobs, "test", key["capacity"], "estimate", 1024)
+            env = make_env(jobs, "test", key["capacity"], "estimate", 1024, machine_gpus=key["machine_gpus"])
             starts = overlapping_starts(env) if args.overlapping else nonoverlap_starts(env)
             base = {}
             for name, pol in get_policies(seed=0).items():
                 if name == "sjf_pred" and "pred_duration" not in jobs.columns:
                     continue
                 base[name] = np.array([run_episode(env, pol, start=int(s))[0]["avg_wait_h"] for s in starts])
-                rows += [{"setting": "baseline", "policy": name, "capacity": key["capacity"], "seed": -1,
+                rows += [{"setting": "baseline", "policy": name, "capacity": key["capacity"],
+                          "machine_gpus": key["machine_gpus"], "seed": -1,
                           "episode": e, "start": int(s), "avg_wait_h": w}
                          for e, (s, w) in enumerate(zip(starts, base[name]))]
             envs[env_key] = (jobs, starts, base)
         jobs, starts, base = envs[env_key]
-        env = make_env(jobs, "test", key["capacity"], key["duration_info"], 1024, no_wait=key["no_wait"])
+        env = make_env(jobs, "test", key["capacity"], key["duration_info"], 1024, no_wait=key["no_wait"],
+                       machine_gpus=key["machine_gpus"])
 
         waits, wait_share = [], []
         for d in seed_dirs:
@@ -95,7 +100,8 @@ def main():
             for e, s in enumerate(starts):
                 m, _ = run_episode(env, pol, start=int(s))
                 w.append(m["avg_wait_h"])
-                rows.append({"setting": label, "policy": label, "capacity": key["capacity"], "seed": d.name,
+                rows.append({"setting": label, "policy": label, "capacity": key["capacity"],
+                             "machine_gpus": key["machine_gpus"], "seed": d.name,
                              "episode": e, "start": int(s), **m})
             waits.append(w)
             wait_share.append(pol.waits / max(pol.steps, 1))

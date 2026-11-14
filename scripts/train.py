@@ -67,6 +67,8 @@ def main():
     ap.add_argument("--capacity", type=int, default=256)
     ap.add_argument("--duration-info", default="estimate", choices=["estimate", "predicted", "oracle", "none", "signals"])
     ap.add_argument("--no-wait", action="store_true", help="ablation: remove the WAIT action")
+    ap.add_argument("--machine-gpus", type=int, default=None,
+                    help="model the cluster as machines with this many GPUs (default: one pool)")
     ap.add_argument("--timesteps", type=int, default=1_000_000)
     ap.add_argument("--eval-every", type=int, default=50_000)
     ap.add_argument("--train-episode-len", type=int, default=256)
@@ -91,9 +93,9 @@ def main():
             hp[key] = value
     jobs = load_vc_jobs(args.jobs_csv, args.vc)
     train_env = make_env(jobs, "fit", args.capacity, args.duration_info, args.train_episode_len,
-                         no_wait=args.no_wait)
+                         no_wait=args.no_wait, machine_gpus=args.machine_gpus)
     val_env = make_env(jobs, "validation", args.capacity, args.duration_info, args.val_episode_len,
-                       no_wait=args.no_wait)
+                       no_wait=args.no_wait, machine_gpus=args.machine_gpus)
     validator = Validator(val_env)
     config = {**vars(args), "hyperparameters": hp, "git": git_hash(),
               "val_episodes": len(validator.starts), "val_first_fit_avg_wait_h": float(validator.ref.mean()),

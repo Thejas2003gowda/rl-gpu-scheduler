@@ -146,7 +146,7 @@ Python 3.10 or newer (tested with 3.13 and 3.14).
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt        # simulator, baselines, predictors
 pip install -r requirements-rl.txt     # DQN (PyTorch) and MaskablePPO (sb3-contrib)
-python -m pytest -q                    # 36 tests
+python -m pytest -q                    # 41 tests
 ```
 
 ## Data
@@ -217,6 +217,16 @@ python scripts/compare_to_rule.py --report results/rl/D_test --rule sjf_oracle -
 python scripts/compare_settings.py --a results/rl/D_test --b results/rl/B_test \
     --a-info estimate_wait10 --b-info estimate --out results/rl/D_vs_B
 
+# 5d. E2, 8-GPU machines (pre-registered addendum)
+python scripts/run_many.py batches/E2_machines.txt --parallel 2
+python scripts/evaluate.py --runs runs/E2/* --out results/rl/E2_test
+python scripts/evaluate.py --runs runs/E2/dqn_c256_estimate_m8 runs/E2/ppo_c256_estimate_m8 \
+    --overlapping --out results/rl/E2_test_overlapping
+python scripts/evaluate.py --runs runs/B/dqn_c256_estimate runs/B/ppo_c256_estimate runs/B/dqn_c128_estimate \
+    runs/B/ppo_c128_estimate --machine-gpus 8 --out results/rl/E2_transfer
+python scripts/compare_settings.py --a results/rl/E2_test --b results/rl/E2_transfer \
+    --a-info estimate_m8 --b-info estimate --out results/rl/E2_retrained_vs_transfer
+
 # 6. Exploratory analyses of the main test (no training needed)
 python scripts/analyze_load.py --report results/rl/B_test --out results/analysis/load
 python scripts/summarize_secondary.py --report results/rl/B_test --out results/analysis/secondary
@@ -232,6 +242,7 @@ Training uses the CPU; one run takes 1-2 minutes on a recent laptop.
 | Part | Definition |
 |---|---|
 | Simulator | Event-driven replay of one pool of `C` GPUs. Jobs arrive at their trace submit times, need all their GPUs at once (gang scheduling), and run for their trace duration. No preemption. |
+| Machine model (E2) | Optional (`machine_gpus=8`): `C / 8` machines; a job of up to 8 GPUs must fit on one machine, larger jobs need whole empty machines. Placement is a fixed best-fit rule, never learned. With one machine of `C` GPUs it equals the pool model. |
 | Decision point | Whenever at least one job in the visible window fits in the free GPUs. Time jumps between arrivals and completions. |
 | State (52 values in [0, 1]) | For each of the first 10 queued jobs: slot filled, GPUs requested / C, fits now, log run-time feature, log time waited. Plus free GPUs / C and log queue length. Fixed scales, so inputs mean the same in 256- and 1,024-job episodes. |
 | Run-time feature | `estimate`: user's past average (realistic). `predicted`: boosted-tree model on submit-time features (realistic). `oracle`: true run time (reference). `none`: 0. `signals`: user's past average plus 8 extra inputs per job (the user's job count, median, spread, last-2 and same-GPU-count run times, failure share, time of day), appended after the 2 global values (132 inputs in all). |
@@ -340,8 +351,9 @@ there, and with user averages it waits more than first-fit.
 
 ## Modeling assumptions and limitations
 
-* **One pool of GPUs.** No placement on specific servers and no locality; a machine-level
-  model (for example 8-GPU servers) is not implemented.
+* **One pool of GPUs in the main experiments.** No placement on specific servers and no
+  locality. E2 repeats the main comparison on 8-GPU machines with a fixed best-fit placement
+  rule; other placement rules and network locality are not modeled.
 * **Smaller than the real cluster.** All studied sizes are scarcity scenarios (see above).
 * **Retries folded into one job**; killed and failed jobs are kept. No preemption.
 * **Window of 10.** Neither agents nor baselines can start a job beyond the first 10 queued.
@@ -390,7 +402,7 @@ scripts/
 configs/           Frozen hyperparameters (dqn.json, ppo.json) and the reasons for them
 batches/           Training commands for each experiment batch
 results/           Committed results (baselines, trace check, predictors, validation, RL tests, analyses, figures)
-tests/             36 tests (simulator, rewards, warm start, statistics, predictors, DQN, networks, signals)
+tests/             41 tests (simulator, rewards, warm start, statistics, predictors, DQN, networks, signals, machines)
 PREREGISTRATION.md Test plan fixed before any trained agent was evaluated on the test period
 ```
 

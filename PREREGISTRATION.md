@@ -134,3 +134,43 @@ test-period result of this agent.
 * **Already seen:** A6 on validation (above). No test-period result of DQN with WAIT.
 * **Unchanged:** the main result, its success criterion and the frozen settings. E4 is an
   added experiment.
+
+---
+
+## Addendum: E2 (8-GPU machines, RQ3)
+
+Added after every result above, before any test-period result on the machine model (rules
+or agents).
+
+* **Question (RQ3):** do the conclusions of the main test hold when the cluster is modeled
+  as 8-GPU machines instead of one pool?
+* **Cluster model** (`machine_gpus=8` in `gpusched/env.py`): 256 GPUs = 32 machines, 128 GPUs
+  = 16 machines. A job of up to 8 GPUs must fit on one machine; a larger job (2 jobs in this
+  virtual cluster need 16) needs whole empty machines. Placement is a fixed best-fit rule
+  (the machine with the fewest free GPUs that still fits), never chosen by the agent; the
+  agent still only chooses which job starts next. The agent's inputs are unchanged, except
+  that "fits now" means "fits on a machine". With one machine as big as the cluster, the
+  model gives exactly the pool results (tested).
+* **Agents, primary (retrained):** the batch B user-average agents retrained on the machine
+  model with the same frozen configs, steps and seeds (`batches/E2_machines.txt`): DQN
+  (no WAIT) and PPO, 256 GPUs with 10 seeds each, 128 GPUs with 5 seeds each (30 runs).
+* **Agents, secondary (transfer):** the batch B agents trained on one pool, tested on the
+  machine model without retraining (`evaluate.py --machine-gpus 8`).
+* **Test:** the 15 non-overlapping test episodes, with all rule-based baselines re-run on
+  the machine model (first-fit = oldest job that fits on a machine); 30 overlapping episodes
+  as a robustness check at 256 GPUs.
+* **Primary criterion:** for each retrained agent at 256 GPUs, the main success criterion vs
+  first-fit on machines. The conclusion "holds" for an agent if its outcome (met / not met)
+  is the same as in the main test (DQN met, PPO not met).
+* **Also reported:** the same at 128 GPUs (main outcome there: DQN met, PPO not met); the
+  rules on machines, including SJF with true run times (how much job order matters); the
+  transferred agents; retrained vs transferred agents (`scripts/compare_settings.py`).
+* **Expected in advance:** job order matters at least as much as in the pool model (larger
+  waits for first-fit, a similar or larger gap to SJF with true run times), and
+  smallest-GPU-first does worse than in the pool model, because 8-GPU jobs need a whole
+  empty machine. The RL edge stays small, because the run-time information is unchanged.
+* **Already seen:** validation-period rule results on the machine model (sanity checks:
+  identical to the pool with one machine; with 8-GPU machines at 256 GPUs, first-fit waits
+  46.9 h vs 38.7 h in the pool and smallest-GPU-first is 5.7% worse than first-fit). No
+  test-period result on the machine model.
+* **Unchanged:** the main result, its success criterion and the frozen settings.

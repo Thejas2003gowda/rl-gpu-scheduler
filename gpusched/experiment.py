@@ -33,13 +33,14 @@ def splits(jobs):
             "test": test}
 
 
-def make_env(jobs, period, capacity, duration_info, episode_len, window=10, no_wait=False):
+def make_env(jobs, period, capacity, duration_info, episode_len, window=10, no_wait=False, machine_gpus=None):
     if duration_info == "signals":  # per-job history signals, computed on the whole cluster
         from .predict import add_agent_signals
         jobs = add_agent_signals(jobs)
     part = splits(jobs)[period]
     return GPUSchedEnv(part, capacity=capacity, window=window, episode_len=episode_len,
-                       duration_info=duration_info, warm_start=True, history=jobs, no_wait=no_wait)
+                       duration_info=duration_info, warm_start=True, history=jobs, no_wait=no_wait,
+                       machine_gpus=machine_gpus)
 
 
 def nonoverlap_starts(env):
