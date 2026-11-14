@@ -1,0 +1,39 @@
+# Batch D (E4): DQN with the WAIT action and 10-step returns (pre-registered in PREREGISTRATION.md).
+# Frozen configs/dqn.json plus gamma 1.0 and n_step 10, WAIT allowed: the settings of capability
+# check A6. True run times (oracle) and user averages (estimate). Validation-only during training.
+# 30 runs; about 20-25 min at --parallel 2 on a recent laptop CPU. Safe to stop and restart.
+# Run:  python scripts/run_many.py batches/D_dqn_wait.txt --parallel 2
+
+# --- 256 GPUs, 10 seeds per information level
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed0
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed1
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed2
+python scripts/train.py --algo dqn --seed 3 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed3
+python scripts/train.py --algo dqn --seed 4 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed4
+python scripts/train.py --algo dqn --seed 5 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed5
+python scripts/train.py --algo dqn --seed 5 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed5
+python scripts/train.py --algo dqn --seed 6 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed6
+python scripts/train.py --algo dqn --seed 6 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed6
+python scripts/train.py --algo dqn --seed 7 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed7
+python scripts/train.py --algo dqn --seed 7 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed7
+python scripts/train.py --algo dqn --seed 8 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed8
+python scripts/train.py --algo dqn --seed 8 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed8
+python scripts/train.py --algo dqn --seed 9 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_oracle_wait10/seed9
+python scripts/train.py --algo dqn --seed 9 --capacity 256 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c256_estimate_wait10/seed9
+
+# --- 128 GPUs, 5 seeds per information level
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_oracle_wait10/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 128 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_estimate_wait10/seed0
+python scripts/train.py --algo dqn --seed 1 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_oracle_wait10/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 128 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_estimate_wait10/seed1
+python scripts/train.py --algo dqn --seed 2 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_oracle_wait10/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 128 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_estimate_wait10/seed2
+python scripts/train.py --algo dqn --seed 3 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_oracle_wait10/seed3
+python scripts/train.py --algo dqn --seed 3 --capacity 128 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_estimate_wait10/seed3
+python scripts/train.py --algo dqn --seed 4 --capacity 128 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_oracle_wait10/seed4
+python scripts/train.py --algo dqn --seed 4 --capacity 128 --duration-info estimate --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/D/dqn_c128_estimate_wait10/seed4

@@ -188,6 +188,14 @@ python scripts/evaluate.py --runs runs/C/* --out results/rl/C_test
 python scripts/compare_settings.py --a results/rl/C_test --b results/rl/B_test \
     --a-info signals --b-info estimate --out results/rl/C_signals_vs_estimate
 
+# 5c. E4, DQN with WAIT and 10-step returns (pre-registered addendum)
+python scripts/run_many.py batches/D_dqn_wait.txt --parallel 2
+python scripts/evaluate.py --runs runs/D/* --out results/rl/D_test
+python scripts/evaluate.py --runs runs/D/dqn_c256_* --overlapping --out results/rl/D_test_overlapping
+python scripts/compare_to_rule.py --report results/rl/D_test --rule sjf_oracle --out results/rl/D_vs_sjf_true
+python scripts/compare_settings.py --a results/rl/D_test --b results/rl/B_test \
+    --a-info estimate_wait10 --b-info estimate --out results/rl/D_vs_B
+
 # 6. Exploratory analyses of the main test (no training needed)
 python scripts/analyze_load.py --report results/rl/B_test --out results/analysis/load
 python scripts/summarize_secondary.py --report results/rl/B_test --out results/analysis/secondary
@@ -349,6 +357,7 @@ scripts/
   train.py                Train DQN or MaskablePPO for one seed; best checkpoint on validation
   evaluate.py             Test-period evaluation and success criterion
   compare_settings.py     Same agents with two information levels: difference and its CI
+  compare_to_rule.py      Agents vs one rule (e.g. SJF with true run times) on the same episodes
   run_many.py             Run a batch file of training commands in parallel
   summarize_runs.py       One line per training run (validation results)
   summarize_capability.py Capability checks over seeds vs the original single-seed checks
