@@ -40,7 +40,7 @@ episodes.
   PPO +12.2% [-1.9, +35.4], while smallest-GPU-first reaches -5.4%.
 * **No deliberate waiting.** PPO chose WAIT in 0% of decisions in every setting; DQN is
   trained without the WAIT action (with the settings of the original checks, DQN with WAIT
-  stalled; see "Capability checks" for a later check where it does not).
+  stalled; E4 below tests DQN with WAIT and 10-step returns).
 
 **Scarcer clusters** (user-average run times, 5 seeds):
 
@@ -91,6 +91,25 @@ No difference is significant, as stated in advance: the same signals order nearb
 jobs barely better than a coin flip. With the extra inputs, DQN at 256 GPUs no longer meets
 the success criterion.
 
+**DQN with the WAIT action and 10-step returns** (E4, pre-registered addendum): the settings
+of capability check A6, which beat SJF with true run times on validation;
+[`results/rl/D_test/`](results/rl/D_test/), [`D_vs_sjf_true/`](results/rl/D_vs_sjf_true/),
+[`D_vs_B/`](results/rl/D_vs_B/):
+
+| Agents | Run-time information | vs first-fit | vs SJF (true) | Per seed vs first-fit | WAIT share |
+|---|---|---|---|---|---|
+| 256 GPUs, 10 seeds | True | -1.4% [-12.7, +93.5] | +9.6% [-3.6, +114.3] | 8 seeds -11.9% to +7.3%; 2 fail (+171%, +262%) | 29% |
+| 256 GPUs, 10 seeds | User average | +26.7% [+0.8, +137.9] | +40.9% [+10.2, +162.7] | all 10 worse: +1.2% to +368% | 31% |
+| 128 GPUs, 5 seeds | True | -20.3% [-32.0, +83.2] | +4.1% [-5.4, +141.1] | 4 seeds -13.6% to -25.9% (SJF true -23.5%); 1 fails (+122%) | 28% |
+| 128 GPUs, 5 seeds | User average | +11.2% [-10.3, +116.7] | +45.3% [+11.2, +180.6] | 3 seeds -6.9% to -8.3%; 2 fail (+48%, +143%) | 27% |
+
+Neither primary question succeeds, as expected in advance. With true run times, the agent
+at best matches SJF with true run times on test, after beating it by about 12 points on the
+busier validation period. With user averages, waiting backfires: every seed at 256 GPUs waits
+more than first-fit, and the agent is worse than the DQN without WAIT (difference +28.6
+points [+3.3, +138.5]). Robustness, 30 overlapping episodes at 256 GPUs: true run times
+-11.6% [-26.4, +83.4], user averages +37.0% [-3.4, +149.6].
+
 **Another virtual cluster** (`11cb48`, 72 GPUs = same offered load as the main test;
 agents from the main test, no retraining):
 
@@ -110,7 +129,9 @@ more than 3 points.
 **Takeaways.** Realistic run-time estimates order nearby jobs barely better than a coin
 flip (52-54% on test), so neither rules nor agents recover much of the gain that true run
 times would give. The RL edge, where it exists, is largest when GPUs are scarcest and is
-of the same size as the best simple rule.
+of the same size as the best simple rule. Holding GPUs free on purpose, the one thing a
+learned policy can do that greedy rules do not, helps only with true run times on a busy
+cluster; with realistic estimates it makes waiting worse (E4).
 
 Figures: [`results/figures/`](results/figures/) (`main_test_256`, `information_levels`,
 `scarcity`, `capability_check`; PNG and PDF).
@@ -314,8 +335,8 @@ given for those settings do not hold up with more seeds. (1) No clear difference
 gamma = 1.0 for PPO; when PPO fails it never chooses WAIT, so the failures are not stalling.
 (2) DQN can use WAIT: with the frozen settings and 10-step returns, every seed keeps GPUs free
 in 14-24% of decisions and beats SJF with true run times on validation. This was found after
-the test results and has not been tested on the test period or with realistic run-time
-information.
+the test results; tested on the test period in E4, it at best matches SJF with true run times
+there, and with user averages it waits more than first-fit.
 
 ## Modeling assumptions and limitations
 

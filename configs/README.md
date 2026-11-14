@@ -21,7 +21,9 @@ test result uses them. The checks were later repeated with 3 seeds and the origi
     with the frozen settings, the WAIT action and 10-step returns, DQN reaches -32% on
     validation in all 3 seeds (-24% at the last checkpoint), beating SJF with true run times
     by keeping GPUs free. It was found after the test results, so the frozen settings were
-    not changed.
+    not changed. Tested on the test period as E4 (pre-registered), it at best matches SJF with
+    true run times, and with user averages it is worse than first-fit and than the DQN
+    without WAIT.
 * **Flat MLP** (`arch=mlp`) is kept only for comparison: it does not learn (3 seeds) and
   cannot even imitate SJF (84% vs 99% agreement; `results/validation/`
   `architecture_diagnostic_c256.txt`, repeated in `rerun/`).
