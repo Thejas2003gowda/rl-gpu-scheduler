@@ -39,7 +39,8 @@ episodes.
   30 randomly placed (overlapping) episodes the gain disappears: DQN +2.5% [-11.9, +22.1],
   PPO +12.2% [-1.9, +35.4], while smallest-GPU-first reaches -5.4%.
 * **No deliberate waiting.** PPO chose WAIT in 0% of decisions in every setting; DQN is
-  trained without the WAIT action (with it, DQN stalled on validation).
+  trained without the WAIT action (with the settings of the original checks, DQN with WAIT
+  stalled; see "Capability checks" for a later check where it does not).
 
 **Scarcer clusters** (user-average run times, 5 seeds):
 
@@ -280,19 +281,33 @@ requested, the user's finished jobs, hour and weekday, recent submissions):
 Pair-order accuracy is how often two nearby queued jobs are put in the right order (50% =
 coin flip).
 
-**Capability checks** (validation only, agents see true run times; `results/validation/`):
+**Capability checks** (validation only, agents see true run times, 256 GPUs unless noted).
+The settings in `configs/` were fixed from single-seed checks (`results/validation/batch*.csv`)
+and later repeated with 3 seeds and the original settings (`results/validation/rerun/`).
+Change in total wait vs first-fit, best / last checkpoint (the best is picked on the same
+episodes, so it is optimistic). SJF with true run times: -20.4% (256 GPUs), -17.6% (128).
 
-| Network / setting | Best validation result | SJF (true) |
-|---|---|---|
-| Flat MLP (PPO, DQN) | -0.4% to -3.7% | -20.4% |
-| Per-job scorer, PPO, gamma 1.0 | -20.6% (256 GPUs), -19.2% (128 GPUs) | -20.4% / -17.6% |
-| Per-job scorer, PPO, gamma 0.99 | -4.0% (256 GPUs) | -20.4% |
-| Per-job scorer, DQN with WAIT | -10.3% (chooses WAIT 20-30% of the time) | -20.4% |
-| Per-job scorer, DQN without WAIT | -18.7% early in training, then drifts to about -5% | -20.4% |
+| Network / setting | Original (1 seed), best | 3 seeds: best / last checkpoint | Holds up? |
+|---|---|---|---|
+| Flat MLP (PPO, DQN; 128 and 256 GPUs) | +2.7% to -3.7% | at most -4.9% (mean) / mean at or above 0% | Yes: does not learn |
+| Per-job scorer, PPO, gamma 1.0 | -20.6% | 2 of 3 seeds about -17% to -21% / unstable | Partly: not every seed learns |
+| Per-job scorer, PPO, gamma 0.99 | -4.0% | 1 of 3 seeds -21% (2 of 3 at 128 GPUs) | No clear difference from gamma 1.0 |
+| Per-job scorer, DQN with WAIT | -10.3% | -5% to -7% (WAIT 23-35%) / -1% to -4% | Yes: fails |
+| Dueling per-job DQN with WAIT | +6.3% to +6.9% | +5.6% to +7.8% / +11% to +14% | Yes: worse |
+| DQN with WAIT, 10-step returns | +20.6% | -16.9% (seeds -4.9% to -35.5%) / diverges | Unstable |
+| DQN without WAIT, frozen settings | -18.7% | -13.3% (2 of 3 seeds about -18%) / -6% | Yes: peaks early, then drifts |
+| DQN with WAIT, 10-step returns, frozen settings (added check, A6) | - | **-32.3% (-31.8% to -33.3%) / -24.0%** | New: beats SJF(true) by waiting |
 
-With a discount factor below 1, WAIT pushes later costs further away and looks cheaper
-than it is, so agents learn to stall; PPO therefore uses gamma = 1. DQN is trained without
-WAIT and evaluated at its best validation checkpoint.
+The plain network and the per-job scorer were also compared without RL, by imitating SJF
+with true run times: 84% vs 99% agreement (validation -7.1% vs -20.3%).
+
+**What this means.** All test results use the frozen settings, so they stand. Two reasons
+given for those settings do not hold up with more seeds. (1) No clear difference supports
+gamma = 1.0 for PPO; when PPO fails it never chooses WAIT, so the failures are not stalling.
+(2) DQN can use WAIT: with the frozen settings and 10-step returns, every seed keeps GPUs free
+in 14-24% of decisions and beats SJF with true run times on validation. This was found after
+the test results and has not been tested on the test period or with realistic run-time
+information.
 
 ## Modeling assumptions and limitations
 
