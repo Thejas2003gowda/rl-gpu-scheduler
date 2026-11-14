@@ -1,0 +1,12 @@
+# Batch A6: frozen DQN settings (configs/dqn.json) but WITH the WAIT action, 1-step vs 10-step
+# returns. Validation only, true run times, 256 GPUs, gamma 1.0. 3 seeds = 6 runs of 300k steps.
+# Added after the main results to check whether DQN can learn to wait when run times are known;
+# it does not change any frozen setting or test result.
+# Run:  python scripts/run_many.py batches/A6_dqn_wait_frozen.txt --parallel 2
+
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=1 --out runs/capability/A6/dqn_frozen_c256_oracle_wait_n1/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/capability/A6/dqn_frozen_c256_oracle_wait_n10/seed0
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=1 --out runs/capability/A6/dqn_frozen_c256_oracle_wait_n1/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/capability/A6/dqn_frozen_c256_oracle_wait_n10/seed1
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=1 --out runs/capability/A6/dqn_frozen_c256_oracle_wait_n1/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set gamma=1.0 --set n_step=10 --out runs/capability/A6/dqn_frozen_c256_oracle_wait_n10/seed2

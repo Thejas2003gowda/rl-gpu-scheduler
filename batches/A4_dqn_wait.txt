@@ -1,5 +1,13 @@
 # Batch A4: why does DQN choose WAIT? Validation only, true run times, 256 GPUs, gamma 1.0.
-# (a) per-job network without the WAIT action; (b) per-job network with 10-step returns.
+# (a) per-job network without the WAIT action; (b) with 10-step returns. 3 seeds = 6 runs.
+# Settings: every value that differs from today's frozen configs/ is set explicitly, so this
+# file re-creates the settings the original single-seed check used (results/validation/).
+# 3 seeds per setting; outputs in runs/capability/. Summary: scripts/summarize_capability.py
+# Run:  python scripts/run_many.py batches/A4_dqn_wait.txt --parallel 2
 
-python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set gamma=1.0 --no-wait --out runs/A4/dqn_slot_c256_oracle_nowait/seed0
-python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set gamma=1.0 --set n_step=10 --out runs/A4/dqn_slot_c256_oracle_n10/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set lr=0.0003 --set target_update_interval=2000 --set gamma=1.0 --no-wait --out runs/capability/A4/dqn_slot_c256_oracle_nowait/seed0
+python scripts/train.py --algo dqn --seed 0 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set lr=0.0003 --set target_update_interval=2000 --set gamma=1.0 --set n_step=10 --out runs/capability/A4/dqn_slot_c256_oracle_n10/seed0
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set lr=0.0003 --set target_update_interval=2000 --set gamma=1.0 --no-wait --out runs/capability/A4/dqn_slot_c256_oracle_nowait/seed1
+python scripts/train.py --algo dqn --seed 1 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set lr=0.0003 --set target_update_interval=2000 --set gamma=1.0 --set n_step=10 --out runs/capability/A4/dqn_slot_c256_oracle_n10/seed1
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set lr=0.0003 --set target_update_interval=2000 --set gamma=1.0 --no-wait --out runs/capability/A4/dqn_slot_c256_oracle_nowait/seed2
+python scripts/train.py --algo dqn --seed 2 --capacity 256 --duration-info oracle --timesteps 300000 --eval-every 25000 --config configs/dqn.json --set arch=slot --set hidden=[64,64] --set lr=0.0003 --set target_update_interval=2000 --set gamma=1.0 --set n_step=10 --out runs/capability/A4/dqn_slot_c256_oracle_n10/seed2

@@ -146,8 +146,9 @@ keeps killed and failed jobs (they used GPUs), and prints the workload statistic
 
 ## Reproducing the results
 
-Every result folder under `results/` was produced by the commands below, except
-`results/validation/` (see step 3). Training runs write checkpoints to `runs/` (git-ignored).
+Every result folder under `results/` was produced by the commands below, except the original
+single-seed checks in `results/validation/batch*.csv` (step 3 re-creates their settings). Training
+runs write checkpoints to `runs/` (git-ignored).
 
 ```bash
 # 1. Rule-based baselines (main setup and other cluster sizes)
@@ -159,12 +160,14 @@ python scripts/run_baselines.py --data philly --vc 6214e9 --capacity 256 --warm-
 # 2. Simulator vs recorded waits; offered load per period
 python scripts/check_trace_waits.py --job-log philly-traces/trace-data/cluster_job_log
 
-# 3. Capability checks (validation only; agents see true run times). The A batch files read
-#    configs/, which were frozen after these checks ran, so today they do not re-create the
-#    settings behind results/validation/ (except A5, which sets them explicitly).
+# 3. Capability checks (validation only; agents see true run times; 3 seeds per setting).
+#    Each batch line sets every value that differs from today's frozen configs/, so it
+#    re-creates the settings of the original single-seed checks in results/validation/.
 python scripts/diagnose_architecture.py --capacity 256
-python scripts/run_many.py batches/A2_slot.txt --parallel 2          # also A_small, A3, A4, A5
-python scripts/summarize_runs.py runs/A2
+for b in A_small A2_slot A3_dqn_dueling A4_dqn_wait A5_dqn_stable A6_dqn_wait_frozen; do
+  python scripts/run_many.py batches/$b.txt --parallel 2
+done
+python scripts/summarize_capability.py --runs runs/capability --out results/validation/rerun
 
 # 4. Main experiments: 70 training runs (about 1 h at --parallel 2 on a laptop CPU)
 python scripts/run_many.py batches/B_main.txt --parallel 2
@@ -333,6 +336,7 @@ scripts/
   compare_settings.py     Same agents with two information levels: difference and its CI
   run_many.py             Run a batch file of training commands in parallel
   summarize_runs.py       One line per training run (validation results)
+  summarize_capability.py Capability checks over seeds vs the original single-seed checks
   smoke_maskable_ppo.py   Quick check that MaskablePPO trains on the environment
   plot_paired_figure.py   Paired-comparison figure from a paired.csv
   make_figures.py         Summary figures -> results/figures/
