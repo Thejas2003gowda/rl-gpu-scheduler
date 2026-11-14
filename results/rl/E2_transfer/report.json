@@ -1,0 +1,256 @@
+{
+  "dqn_c256_estimate": {
+    "settings": {
+      "jobs_csv": "data/philly_jobs_pred_6214e9.csv",
+      "vc": "6214e9",
+      "capacity": 256,
+      "duration_info": "estimate",
+      "no_wait": true,
+      "machine_gpus": 8
+    },
+    "checkpoint": "best",
+    "episodes": 15,
+    "success_test_vs_first_fit": {
+      "iqm_change_pct": 0.40244996035943004,
+      "ci_lo": -3.6917523617923322,
+      "ci_hi": 6.806195949930261,
+      "success": false,
+      "n_seeds": 10,
+      "n_episodes": 15,
+      "per_seed_change_pct": [
+        1.505305114611044,
+        2.495168190710917,
+        2.3647785126069465,
+        15.957389597196748,
+        -2.762933269471035,
+        0.47775794629927315,
+        -2.297373432844285,
+        -1.7888023548446874,
+        1.7915930724327511,
+        -1.9359325289487472
+      ]
+    },
+    "gap_closed_to_sjf_true": {
+      "share": -0.46788882491950545,
+      "ci_lo": -9.265527856218092,
+      "ci_hi": 0.40771527731320545
+    },
+    "best_realistic_rule": "sgf",
+    "change_vs_best_rule_pct_per_seed": [
+      -0.8851356179884085,
+      0.08141627241400329,
+      -0.045902740592240754,
+      13.226603585312313,
+      -5.052857375099762,
+      -1.888484143647684,
+      -4.598261430416173,
+      -4.1016671551945105,
+      -0.6055897156174495,
+      -4.245332427037784
+    ],
+    "baseline_change_vs_first_fit_pct": {
+      "random": 8.106868878842466,
+      "fifo": 42.24802094587239,
+      "fifo_ff": 0.0,
+      "sjf": 4.797932106124425,
+      "sjf_pred": 2.5961185482640925,
+      "sjf_oracle": -3.3783561405785756,
+      "sgf": 2.4117883301399967
+    },
+    "wait_action_share_per_seed": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "ppo_c256_estimate": {
+    "settings": {
+      "jobs_csv": "data/philly_jobs_pred_6214e9.csv",
+      "vc": "6214e9",
+      "capacity": 256,
+      "duration_info": "estimate",
+      "no_wait": false,
+      "machine_gpus": 8
+    },
+    "checkpoint": "best",
+    "episodes": 15,
+    "success_test_vs_first_fit": {
+      "iqm_change_pct": 11.67979798776094,
+      "ci_lo": -1.992295987729171,
+      "ci_hi": 35.3573488868746,
+      "success": false,
+      "n_seeds": 10,
+      "n_episodes": 15,
+      "per_seed_change_pct": [
+        -0.5698047218879787,
+        25.259044651774243,
+        23.283373504372907,
+        -2.7097482065353784,
+        -2.2830148444247023,
+        1.4681219753728936,
+        23.549535485997943,
+        30.92443326057934,
+        23.198686023207003,
+        -0.8511243404971336
+      ]
+    },
+    "gap_closed_to_sjf_true": {
+      "share": -3.5896009106722135,
+      "ci_lo": -30.199476702528276,
+      "ci_hi": 0.30543001674952897
+    },
+    "best_realistic_rule": "sgf",
+    "change_vs_best_rule_pct_per_seed": [
+      -2.9113768059750633,
+      22.309205506677255,
+      20.380061235675505,
+      -5.000924815574281,
+      -4.5842409854520705,
+      -0.9214430976686505,
+      20.63995512676451,
+      27.84117472739027,
+      20.297368137012974,
+      -3.186071373071464
+    ],
+    "baseline_change_vs_first_fit_pct": {
+      "random": 8.106868878842466,
+      "fifo": 42.24802094587239,
+      "fifo_ff": 0.0,
+      "sjf": 4.797932106124425,
+      "sjf_pred": 2.5961185482640925,
+      "sjf_oracle": -3.3783561405785756,
+      "sgf": 2.4117883301399967
+    },
+    "wait_action_share_per_seed": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "dqn_c128_estimate": {
+    "settings": {
+      "jobs_csv": "data/philly_jobs_pred_6214e9.csv",
+      "vc": "6214e9",
+      "capacity": 128,
+      "duration_info": "estimate",
+      "no_wait": true,
+      "machine_gpus": 8
+    },
+    "checkpoint": "best",
+    "episodes": 15,
+    "success_test_vs_first_fit": {
+      "iqm_change_pct": -5.179411839681118,
+      "ci_lo": -12.080561121165667,
+      "ci_hi": -0.5391533223647113,
+      "success": true,
+      "n_seeds": 5,
+      "n_episodes": 15,
+      "per_seed_change_pct": [
+        -9.45186103096588,
+        -3.242915091043086,
+        -6.707950172300848,
+        -5.258752495874031,
+        -3.571532850868475
+      ]
+    },
+    "gap_closed_to_sjf_true": {
+      "share": 0.3622762158506823,
+      "ci_lo": 0.0906343778671162,
+      "ci_hi": 0.675066052985372
+    },
+    "best_realistic_rule": "sjf_pred",
+    "change_vs_best_rule_pct_per_seed": [
+      -3.3754995573527458,
+      3.250106518611018,
+      -0.44745466326239214,
+      1.0989934815777147,
+      2.8994363972673964
+    ],
+    "baseline_change_vs_first_fit_pct": {
+      "random": -1.4821816680049116,
+      "fifo": 35.3023878365768,
+      "fifo_ff": 0.0,
+      "sjf": -6.061053050007715,
+      "sjf_pred": -6.288634296453455,
+      "sjf_oracle": -15.586456082829914,
+      "sgf": -1.0539859118648187
+    },
+    "wait_action_share_per_seed": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "ppo_c128_estimate": {
+    "settings": {
+      "jobs_csv": "data/philly_jobs_pred_6214e9.csv",
+      "vc": "6214e9",
+      "capacity": 128,
+      "duration_info": "estimate",
+      "no_wait": false,
+      "machine_gpus": 8
+    },
+    "checkpoint": "best",
+    "episodes": 15,
+    "success_test_vs_first_fit": {
+      "iqm_change_pct": -1.5865978322447887,
+      "ci_lo": -9.183026351399127,
+      "ci_hi": 7.709999025331127,
+      "success": false,
+      "n_seeds": 5,
+      "n_episodes": 15,
+      "per_seed_change_pct": [
+        1.5819541726104447,
+        -2.2682551868847267,
+        -1.395421150993159,
+        -5.532498742489156,
+        -1.09611715885648
+      ]
+    },
+    "gap_closed_to_sjf_true": {
+      "share": 0.11176803784419456,
+      "ci_lo": -0.272377150430717,
+      "ci_hi": 0.5441690560100471
+    },
+    "best_realistic_rule": "sjf_pred",
+    "change_vs_best_rule_pct_per_seed": [
+      8.398755487101006,
+      4.290172359975086,
+      5.221579163556167,
+      0.8068771042738954,
+      5.540968375195132
+    ],
+    "baseline_change_vs_first_fit_pct": {
+      "random": -1.4821816680049116,
+      "fifo": 35.3023878365768,
+      "fifo_ff": 0.0,
+      "sjf": -6.061053050007715,
+      "sjf_pred": -6.288634296453455,
+      "sjf_oracle": -15.586456082829914,
+      "sgf": -1.0539859118648187
+    },
+    "wait_action_share_per_seed": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+}

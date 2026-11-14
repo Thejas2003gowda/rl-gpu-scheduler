@@ -14,7 +14,8 @@ them on held-out data.
 * **RQ1.** Can an RL agent that does not know true job run times wait less than first-fit?
 * **RQ2.** How much does its performance depend on run-time information (none, user
   average, a learned predictor, true run times)?
-* **RQ3.** Do the conclusions hold on a different virtual cluster?
+* **RQ3.** Do the conclusions hold when the cluster is modeled as 8-GPU machines, and on a
+  different virtual cluster?
 
 ## Key results
 
@@ -110,6 +111,27 @@ more than first-fit, and the agent is worse than the DQN without WAIT (differenc
 points [+3.3, +138.5]). Robustness, 30 overlapping episodes at 256 GPUs: true run times
 -11.6% [-26.4, +83.4], user averages +37.0% [-3.4, +149.6].
 
+**8-GPU machines** (E2, pre-registered addendum, RQ3): the same comparison with a fixed
+best-fit placement on 8-GPU machines, agents retrained on machines with the same settings
+and seeds; [`results/rl/E2_test/`](results/rl/E2_test/),
+[`E2_transfer/`](results/rl/E2_transfer/):
+
+| Policy | 256 GPUs (32 machines) | 128 GPUs (16 machines) |
+|---|---|---|
+| DQN, retrained | +1.7% [-3.3, +11.4]: not met (one pool: met) | **-5.0% [-9.3, -1.0]: met** (one pool: met) |
+| PPO, retrained | +0.2% [-3.8, +8.1]: not met (one pool: not met) | -2.9% [-12.3, +7.7]: not met (one pool: not met) |
+| Best realistic rule | first-fit itself; every other rule is worse (+2.4% to +42.2%) | -6.3% (SJF, predicted) |
+| Smallest-GPU-first | +2.4% (one pool: -0.9%) | -1.1% (one pool: -6.1%) |
+| SJF (true run times) | -3.4% (one pool: -10.1%) | -15.6% (one pool: -23.5%) |
+
+The outcome matches the one-pool result in 3 of 4 cases. The exception is the main result:
+DQN at 256 GPUs no longer meets the success criterion. Contrary to the expectation stated
+in advance, job order matters less on machines: at 256 GPUs no realistic rule beats
+first-fit, and even true run times gain only 3.4%. Agents trained on one pool and tested
+on machines do about as well as retrained ones (no difference is significant; for PPO at
+256 GPUs, -11.5 points [-37.4, +1.8] in favor of retraining). Robustness, 30 overlapping
+episodes at 256 GPUs: DQN +3.3% [-5.6, +16.4], PPO -4.0% [-10.7, +4.5].
+
 **Another virtual cluster** (`11cb48`, 72 GPUs = same offered load as the main test;
 agents from the main test, no retraining):
 
@@ -131,7 +153,8 @@ flip (52-54% on test), so neither rules nor agents recover much of the gain that
 times would give. The RL edge, where it exists, is largest when GPUs are scarcest and is
 of the same size as the best simple rule. Holding GPUs free on purpose, the one thing a
 learned policy can do that greedy rules do not, helps only with true run times on a busy
-cluster; with realistic estimates it makes waiting worse (E4).
+cluster; with realistic estimates it makes waiting worse (E4). The one significant RL result
+at 256 GPUs depends on the cluster model: on 8-GPU machines it disappears (E2).
 
 Figures: [`results/figures/`](results/figures/) (`main_test_256`, `information_levels`,
 `scarcity`, `capability_check`; PNG and PDF).
