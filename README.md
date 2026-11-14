@@ -74,6 +74,22 @@ closed):
 With true run times, 4 of 5 PPO seeds match SJF with true run times (one seed fails to
 learn at both sizes). With any realistic information, PPO does not beat the best simple rule.
 
+**Run-time signals as direct agent inputs** (E1b, pre-registered addendum): the
+user-average agents given 8 more inputs per job (the user's job count, median, spread,
+last-2 and same-GPU-count run times, failure share, time of day);
+[`results/rl/C_signals_vs_estimate/`](results/rl/C_signals_vs_estimate/):
+
+| Agents | With signals | User average only | Difference, points [95% CI] |
+|---|---|---|---|
+| DQN, 256 GPUs (10 seeds) | -0.2% [-4.0, +4.0] | -2.0% [-4.4, -0.4] | +1.8 [-0.5, +5.4] |
+| PPO, 256 GPUs (10 seeds) | -0.8% [-3.5, +2.0] | +0.4% [-3.3, +5.3] | -1.2 [-5.7, +2.9] |
+| DQN, 128 GPUs (5 seeds) | -8.2% [-14.2, -1.7] | -7.4% [-12.4, -3.3] | -0.8 [-7.1, +5.8] |
+| PPO, 128 GPUs (5 seeds) | -4.1% [-11.7, +1.3] | -0.2% [-5.1, +3.3] | -3.9 [-11.6, +3.0] |
+
+No difference is significant, as stated in advance: the same signals order nearby test
+jobs barely better than a coin flip. With the extra inputs, DQN at 256 GPUs no longer meets
+the success criterion.
+
 **Another virtual cluster** (`11cb48`, 72 GPUs = same offered load as the main test;
 agents from the main test, no retraining):
 
@@ -130,8 +146,8 @@ keeps killed and failed jobs (they used GPUs), and prints the workload statistic
 
 ## Reproducing the results
 
-Every result folder under `results/` was produced by the commands below. Training runs
-write checkpoints to `runs/` (git-ignored).
+Every result folder under `results/` was produced by the commands below, except
+`results/validation/` (see step 3). Training runs write checkpoints to `runs/` (git-ignored).
 
 ```bash
 # 1. Rule-based baselines (main setup and other cluster sizes)
@@ -143,7 +159,9 @@ python scripts/run_baselines.py --data philly --vc 6214e9 --capacity 256 --warm-
 # 2. Simulator vs recorded waits; offered load per period
 python scripts/check_trace_waits.py --job-log philly-traces/trace-data/cluster_job_log
 
-# 3. Capability checks (validation only; agents see true run times)
+# 3. Capability checks (validation only; agents see true run times). The A batch files read
+#    configs/, which were frozen after these checks ran, so today they do not re-create the
+#    settings behind results/validation/ (except A5, which sets them explicitly).
 python scripts/diagnose_architecture.py --capacity 256
 python scripts/run_many.py batches/A2_slot.txt --parallel 2          # also A_small, A3, A4, A5
 python scripts/summarize_runs.py runs/A2
